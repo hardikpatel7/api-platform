@@ -44,8 +44,10 @@ export function groupApis(entries: ApiEntry[]): Map<string | null, ApiEntry[]> {
 export function buildSubtitle(
   count: number,
   statusFilter: string | null,
-  tagFilter: string | null
+  tagFilter: string | null,
+  isSearch = false
 ): string {
+  if (isSearch) return `${count} results across all projects`
   const parts: string[] = [`${count} ${count === 1 ? 'endpoint' : 'endpoints'}`]
   if (tagFilter) parts.push(`#${tagFilter}`)
   if (statusFilter) parts.push(statusFilter)

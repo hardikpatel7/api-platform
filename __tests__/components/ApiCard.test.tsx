@@ -91,4 +91,14 @@ describe('ApiCard', () => {
     const badge = screen.getByText('Deprecated')
     expect(badge.className).toMatch(/red/)
   })
+
+  it('shows project name badge when projectName prop is provided', () => {
+    render(<ApiCard entry={baseEntry} projectId="p1" projectName="Payments API" />)
+    expect(screen.getByText('Payments API')).toBeInTheDocument()
+  })
+
+  it('does not show project name badge when projectName is not provided', () => {
+    render(<ApiCard entry={baseEntry} projectId="p1" />)
+    expect(screen.queryByTestId('project-name-badge')).not.toBeInTheDocument()
+  })
 })

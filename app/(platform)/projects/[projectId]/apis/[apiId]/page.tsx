@@ -10,7 +10,7 @@ import { ApiDetailActions } from '@/components/api/ApiDetailActions'
 import { generateApiDocsAction } from '@/app/actions/generate'
 import { useRole } from '@/hooks/useRole'
 import { canDo } from '@/lib/permissions'
-import type { ApiEntry } from '@/types'
+import type { ApiEntry, HistoryEntry } from '@/types'
 
 export default function ApiDetailPage() {
   const { projectId, apiId } = useParams<{ projectId: string; apiId: string }>()
@@ -20,25 +20,38 @@ export default function ApiDetailPage() {
   const [entry, setEntry] = useState<ApiEntry | null>(null)
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [historyEvents, setHistoryEvents] = useState<HistoryEntry[]>([])
 
   useEffect(() => {
     const fromStore = apis.find((a) => a.id === apiId)
     if (fromStore) {
       setEntry(fromStore)
       setLoading(false)
-      return
+    } else {
+      async function loadEntry() {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('api_entries')
+          .select('*')
+          .eq('id', apiId)
+          .single()
+        if (data) setEntry(data as ApiEntry)
+        setLoading(false)
+      }
+      loadEntry()
     }
-    async function load() {
+
+    async function loadHistory() {
       const supabase = createClient()
       const { data } = await supabase
-        .from('api_entries')
+        .from('history_events')
         .select('*')
-        .eq('id', apiId)
-        .single()
-      if (data) setEntry(data as ApiEntry)
-      setLoading(false)
+        .eq('api_id', apiId)
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (data) setHistoryEvents(data as HistoryEntry[])
     }
-    load()
+    loadHistory()
   }, [apiId, apis])
 
   async function handleSave(data: Partial<ApiEntry>) {
@@ -113,7 +126,7 @@ export default function ApiDetailPage() {
             onGenerate={role && canDo(role, 'use_ai') ? generateApiDocsAction : undefined}
           />
         ) : (
-          <ApiDetailTabs entry={entry} />
+          <ApiDetailTabs entry={entry} historyEvents={historyEvents} />
         )}
       </div>
     </main>

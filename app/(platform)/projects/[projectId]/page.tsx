@@ -26,6 +26,8 @@ export default function ProjectPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [tagFilter, setTagFilter] = useState<string | null>(null)
   const [searchResultIds, setSearchResultIds] = useState<string[] | null>(null)
+  const [searchEntries, setSearchEntries] = useState<ApiEntry[]>([])
+  const [searchProjectNames, setSearchProjectNames] = useState<Record<string, string>>({})
   const [showOpenAPI, setShowOpenAPI] = useState(false)
   const [showHAR, setShowHAR] = useState(false)
 
@@ -59,12 +61,37 @@ export default function ProjectPage() {
     load()
   }, [projectId])
 
-  const searchFiltered = searchResultIds ? apis.filter((a) => searchResultIds.includes(a.id)) : apis
-  const filtered = filterApis(searchFiltered, statusFilter, tagFilter)
+  async function handleSearchResults(ids: string[] | null) {
+    setSearchResultIds(ids)
+    if (!ids) {
+      setSearchEntries([])
+      setSearchProjectNames({})
+      return
+    }
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('api_entries')
+      .select('*')
+      .in('id', ids)
+    if (data) {
+      setSearchEntries(data as ApiEntry[])
+      // Build project name map from the already-loaded projects list
+      const nameMap: Record<string, string> = {}
+      for (const entry of data as ApiEntry[]) {
+        const proj = projects.find((p) => p.id === entry.project_id)
+        if (proj) nameMap[entry.project_id] = proj.name
+      }
+      setSearchProjectNames(nameMap)
+    }
+  }
+
+  const isSearch = searchResultIds !== null
+  const displayEntries = isSearch ? searchEntries : apis
+  const filtered = isSearch ? displayEntries : filterApis(displayEntries, statusFilter, tagFilter)
   const grouped = groupApis(filtered)
-  const showGroupHeaders = apis.some((a) => a.group)
+  const showGroupHeaders = !isSearch && apis.some((a) => a.group)
   const allTags = [...new Set(apis.flatMap((a) => a.tags ?? []))]
-  const subtitle = buildSubtitle(filtered.length, statusFilter, tagFilter)
+  const subtitle = buildSubtitle(filtered.length, statusFilter, tagFilter, isSearch)
   const apiCounts: Record<string, number> = { [projectId]: apis.length }
 
   return (
@@ -79,7 +106,7 @@ export default function ProjectPage() {
         onStatusFilter={setStatusFilter}
         onTagFilter={setTagFilter}
         onSearch={semanticSearchAction}
-        onSearchResults={setSearchResultIds}
+        onSearchResults={handleSearchResults}
         searchResultIds={searchResultIds}
       />
 
@@ -104,9 +131,11 @@ export default function ProjectPage() {
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : filtered.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {apis.length === 0
-                ? 'No APIs yet. Add one to get started.'
-                : 'No APIs match the current filters.'}
+              {isSearch
+                ? 'No APIs match your search.'
+                : apis.length === 0
+                  ? 'No APIs yet. Add one to get started.'
+                  : 'No APIs match the current filters.'}
             </p>
           ) : (
             <div className="space-y-6">
@@ -120,7 +149,12 @@ export default function ProjectPage() {
                   )}
                   <div className="space-y-2">
                     {entries.map((entry) => (
-                      <ApiCard key={entry.id} entry={entry} projectId={projectId} />
+                      <ApiCard
+                        key={entry.id}
+                        entry={entry}
+                        projectId={entry.project_id}
+                        projectName={isSearch ? searchProjectNames[entry.project_id] : undefined}
+                      />
                     ))}
                   </div>
                 </div>

@@ -115,4 +115,12 @@ describe('buildSubtitle', () => {
   it('uses singular "endpoint" for count of 1', () => {
     expect(buildSubtitle(1, null, null)).toBe('1 endpoint')
   })
+
+  it('shows "N results across all projects" when isSearch is true', () => {
+    expect(buildSubtitle(8, null, null, true)).toBe('8 results across all projects')
+  })
+
+  it('ignores filters when isSearch is true', () => {
+    expect(buildSubtitle(3, 'Stable', 'auth', true)).toBe('3 results across all projects')
+  })
 })

@@ -21,9 +21,10 @@ const STATUS_COLORS: Record<string, string> = {
 interface ApiCardProps {
   entry: ApiEntry
   projectId: string
+  projectName?: string
 }
 
-export function ApiCard({ entry, projectId }: ApiCardProps) {
+export function ApiCard({ entry, projectId, projectName }: ApiCardProps) {
   return (
     <Link
       href={`/projects/${projectId}/apis/${entry.id}`}
@@ -43,6 +44,15 @@ export function ApiCard({ entry, projectId }: ApiCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-medium text-sm">{entry.name}</span>
+
+            {projectName && (
+              <span
+                data-testid="project-name-badge"
+                className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
+              >
+                {projectName}
+              </span>
+            )}
 
             {entry.status && (
               <span

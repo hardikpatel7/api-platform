@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useProjectStore } from '@/store/projectStore'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { useRole } from '@/hooks/useRole'
+import { canDo } from '@/lib/permissions'
 import type { Project } from '@/types'
 
 export default function HomePage() {
   const router = useRouter()
   const { projects, setProjects, addProject, removeProject, loading, setLoading } = useProjectStore()
+  const { role } = useRole()
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -89,12 +92,14 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-xl font-semibold">Projects</h1>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90"
-            >
-              New project
-            </button>
+            {role && canDo(role, 'direct_edit') && (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90"
+              >
+                New project
+              </button>
+            )}
           </div>
 
           {showCreate && (
@@ -156,12 +161,14 @@ export default function HomePage() {
                     <span className="text-xs text-muted-foreground">
                       {apiCounts[project.id] ?? 0} APIs
                     </span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(project.id) }}
-                      className="text-xs text-muted-foreground hover:text-destructive"
-                    >
-                      Delete
-                    </button>
+                    {role && canDo(role, 'direct_edit') && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDelete(project.id) }}
+                        className="text-xs text-muted-foreground hover:text-destructive"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
