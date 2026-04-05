@@ -22,9 +22,10 @@ interface ApiCardProps {
   entry: ApiEntry
   projectId: string
   projectName?: string
+  hasPendingSuggestion?: boolean
 }
 
-export function ApiCard({ entry, projectId, projectName }: ApiCardProps) {
+export function ApiCard({ entry, projectId, projectName, hasPendingSuggestion }: ApiCardProps) {
   return (
     <Link
       href={`/projects/${projectId}/apis/${entry.id}`}
@@ -68,6 +69,12 @@ export function ApiCard({ entry, projectId, projectName }: ApiCardProps) {
             {entry.version && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-mono">
                 {entry.version}
+              </span>
+            )}
+
+            {hasPendingSuggestion && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                Pending review
               </span>
             )}
           </div>

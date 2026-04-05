@@ -101,4 +101,14 @@ describe('ApiCard', () => {
     render(<ApiCard entry={baseEntry} projectId="p1" />)
     expect(screen.queryByTestId('project-name-badge')).not.toBeInTheDocument()
   })
+
+  it('shows a pending badge when hasPendingSuggestion is true', () => {
+    render(<ApiCard entry={baseEntry} projectId="p1" hasPendingSuggestion />)
+    expect(screen.getByText(/pending/i)).toBeInTheDocument()
+  })
+
+  it('does not show pending badge when hasPendingSuggestion is false', () => {
+    render(<ApiCard entry={baseEntry} projectId="p1" hasPendingSuggestion={false} />)
+    expect(screen.queryByText(/pending/i)).not.toBeInTheDocument()
+  })
 })

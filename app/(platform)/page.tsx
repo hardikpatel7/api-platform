@@ -18,6 +18,7 @@ export default function HomePage() {
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
   const [apiCounts, setApiCounts] = useState<Record<string, number>>({})
+  const [pendingSuggestionCount, setPendingSuggestionCount] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -40,6 +41,14 @@ export default function HomePage() {
         }
         setApiCounts(map)
       }
+
+      // Load pending suggestion count
+      const { data: pending } = await supabase
+        .from('suggestions')
+        .select('id')
+        .eq('status', 'pending')
+      if (pending) setPendingSuggestionCount(pending.length)
+
       setLoading(false)
     }
     load()
@@ -86,6 +95,10 @@ export default function HomePage() {
         availableTags={[]}
         onStatusFilter={() => {}}
         onTagFilter={() => {}}
+        role={role}
+        pendingSuggestionCount={pendingSuggestionCount}
+        onOpenSuggestions={() => router.push('/suggestions')}
+        onOpenUsers={() => router.push('/settings/users')}
       />
 
       <main className="flex-1 overflow-y-auto p-6">

@@ -101,3 +101,21 @@ describe('HomePage — role gating', () => {
     })
   })
 })
+
+describe('HomePage — sidebar navigation', () => {
+  it('shows Suggestions link in sidebar for editor', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    render(<HomePage />)
+    await waitFor(() => {
+      expect(screen.getByText('Suggestions')).toBeInTheDocument()
+    })
+  })
+
+  it('shows Users link in sidebar for admin', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false })
+    render(<HomePage />)
+    await waitFor(() => {
+      expect(screen.getByText(/users/i)).toBeInTheDocument()
+    })
+  })
+})

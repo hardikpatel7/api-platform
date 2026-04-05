@@ -52,9 +52,9 @@ describe('UserManagementModal — role change', () => {
         onChangeRole={onChangeRole}
       />
     )
-    // Bob's role dropdown (u2)
+    // selects[0] is the Add User form select; selects[1] is Bob's (first non-current user)
     const selects = screen.getAllByRole('combobox')
-    fireEvent.change(selects[0], { target: { value: 'viewer' } })
+    fireEvent.change(selects[1], { target: { value: 'viewer' } })
     await waitFor(() => {
       expect(onChangeRole).toHaveBeenCalledWith('u2', 'viewer')
     })
@@ -62,8 +62,47 @@ describe('UserManagementModal — role change', () => {
 
   it('does not render a role dropdown for the current user', () => {
     render(<UserManagementModal users={mockUsers} currentUserId="u1" onClose={vi.fn()} />)
-    // Only u2 and u3 should have dropdowns — u1 is current user
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    // u2 and u3 have dropdowns + the Add User form select = 3 total
+    expect(screen.getAllByRole('combobox')).toHaveLength(3)
+  })
+})
+
+describe('UserManagementModal — add user', () => {
+  it('shows an Add User form with name input and role selector', () => {
+    render(<UserManagementModal users={mockUsers} currentUserId="u1" onClose={vi.fn()} />)
+    expect(screen.getByPlaceholderText(/name/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /add user/i })).toBeInTheDocument()
+  })
+
+  it('calls onAddUser with name and role when form is submitted', async () => {
+    const onAddUser = vi.fn().mockResolvedValue(undefined)
+    render(
+      <UserManagementModal
+        users={mockUsers}
+        currentUserId="u1"
+        onClose={vi.fn()}
+        onAddUser={onAddUser}
+      />
+    )
+    fireEvent.change(screen.getByPlaceholderText(/name/i), { target: { value: 'Dave' } })
+    fireEvent.click(screen.getByRole('button', { name: /add user/i }))
+    await waitFor(() => {
+      expect(onAddUser).toHaveBeenCalledWith('Dave', expect.any(String))
+    })
+  })
+
+  it('does not call onAddUser when name is empty', async () => {
+    const onAddUser = vi.fn()
+    render(
+      <UserManagementModal
+        users={mockUsers}
+        currentUserId="u1"
+        onClose={vi.fn()}
+        onAddUser={onAddUser}
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /add user/i }))
+    expect(onAddUser).not.toHaveBeenCalled()
   })
 })
 

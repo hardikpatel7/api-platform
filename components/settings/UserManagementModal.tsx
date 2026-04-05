@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { User, UserRole } from '@/types'
 
@@ -18,6 +19,7 @@ interface UserManagementModalProps {
   onClose: () => void
   onChangeRole?: (userId: string, role: UserRole) => Promise<void>
   onDeleteUser?: (userId: string) => Promise<void>
+  onAddUser?: (name: string, role: UserRole) => Promise<void>
 }
 
 export function UserManagementModal({
@@ -26,7 +28,18 @@ export function UserManagementModal({
   onClose,
   onChangeRole,
   onDeleteUser,
+  onAddUser,
 }: UserManagementModalProps) {
+  const [newName, setNewName] = useState('')
+  const [newRole, setNewRole] = useState<UserRole>('viewer')
+
+  async function handleAdd() {
+    if (!newName.trim()) return
+    await onAddUser?.(newName.trim(), newRole)
+    setNewName('')
+    setNewRole('viewer')
+  }
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-background rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
@@ -38,6 +51,32 @@ export function UserManagementModal({
             className="text-muted-foreground hover:text-foreground"
           >
             ✕
+          </button>
+        </div>
+
+        {/* Add user form */}
+        <div className="flex gap-2 pb-4 border-b">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="New user name"
+            className="flex-1 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <select
+            value={newRole}
+            onChange={(e) => setNewRole(e.target.value as UserRole)}
+            className="text-xs border rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            {ROLES.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+          <button
+            onClick={handleAdd}
+            className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90"
+          >
+            Add user
           </button>
         </div>
 

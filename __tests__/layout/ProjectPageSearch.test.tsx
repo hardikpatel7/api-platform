@@ -98,6 +98,13 @@ beforeEach(() => {
         }),
       }
     }
+    if (table === 'suggestions') {
+      return {
+        select: () => ({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      }
+    }
     return {}
   })
 })

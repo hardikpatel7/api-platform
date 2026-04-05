@@ -30,6 +30,8 @@ export default function ProjectPage() {
   const [searchProjectNames, setSearchProjectNames] = useState<Record<string, string>>({})
   const [showOpenAPI, setShowOpenAPI] = useState(false)
   const [showHAR, setShowHAR] = useState(false)
+  const [pendingSuggestionCount, setPendingSuggestionCount] = useState(0)
+  const [pendingApiIds, setPendingApiIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function load() {
@@ -55,6 +57,16 @@ export default function ProjectPage() {
         .select('id, name, description, created_by, created_at')
         .order('created_at', { ascending: false })
       if (projs) setProjects(projs as Project[])
+
+      // Load pending suggestions
+      const { data: pending } = await supabase
+        .from('suggestions')
+        .select('id, api_id')
+        .eq('status', 'pending')
+      if (pending) {
+        setPendingSuggestionCount(pending.length)
+        setPendingApiIds(new Set(pending.map((s: { api_id: string | null }) => s.api_id).filter(Boolean) as string[]))
+      }
 
       setLoading(false)
     }
@@ -108,6 +120,10 @@ export default function ProjectPage() {
         onSearch={semanticSearchAction}
         onSearchResults={handleSearchResults}
         searchResultIds={searchResultIds}
+        role={role}
+        pendingSuggestionCount={pendingSuggestionCount}
+        onOpenSuggestions={() => router.push('/suggestions')}
+        onOpenUsers={() => router.push('/settings/users')}
       />
 
       <main className="flex-1 overflow-y-auto p-6">
@@ -154,6 +170,7 @@ export default function ProjectPage() {
                         entry={entry}
                         projectId={entry.project_id}
                         projectName={isSearch ? searchProjectNames[entry.project_id] : undefined}
+                        hasPendingSuggestion={!isSearch && pendingApiIds.has(entry.id)}
                       />
                     ))}
                   </div>
