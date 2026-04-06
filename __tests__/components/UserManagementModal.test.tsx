@@ -68,13 +68,14 @@ describe('UserManagementModal — role change', () => {
 })
 
 describe('UserManagementModal — add user', () => {
-  it('shows an Add User form with name input and role selector', () => {
+  it('shows an Add User form with name, email inputs and role selector', () => {
     render(<UserManagementModal users={mockUsers} currentUserId="u1" onClose={vi.fn()} />)
     expect(screen.getByPlaceholderText(/name/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /add user/i })).toBeInTheDocument()
   })
 
-  it('calls onAddUser with name and role when form is submitted', async () => {
+  it('calls onAddUser with name, role, and email when form is submitted', async () => {
     const onAddUser = vi.fn().mockResolvedValue(undefined)
     render(
       <UserManagementModal
@@ -85,9 +86,10 @@ describe('UserManagementModal — add user', () => {
       />
     )
     fireEvent.change(screen.getByPlaceholderText(/name/i), { target: { value: 'Dave' } })
+    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'dave@example.com' } })
     fireEvent.click(screen.getByRole('button', { name: /add user/i }))
     await waitFor(() => {
-      expect(onAddUser).toHaveBeenCalledWith('Dave', expect.any(String))
+      expect(onAddUser).toHaveBeenCalledWith('Dave', expect.any(String), 'dave@example.com')
     })
   })
 

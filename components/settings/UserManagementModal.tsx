@@ -19,7 +19,7 @@ interface UserManagementModalProps {
   onClose: () => void
   onChangeRole?: (userId: string, role: UserRole) => Promise<void>
   onDeleteUser?: (userId: string) => Promise<void>
-  onAddUser?: (name: string, role: UserRole) => Promise<void>
+  onAddUser?: (name: string, role: UserRole, email: string) => Promise<void>
 }
 
 export function UserManagementModal({
@@ -31,12 +31,14 @@ export function UserManagementModal({
   onAddUser,
 }: UserManagementModalProps) {
   const [newName, setNewName] = useState('')
+  const [newEmail, setNewEmail] = useState('')
   const [newRole, setNewRole] = useState<UserRole>('viewer')
 
   async function handleAdd() {
     if (!newName.trim()) return
-    await onAddUser?.(newName.trim(), newRole)
+    await onAddUser?.(newName.trim(), newRole, newEmail.trim())
     setNewName('')
+    setNewEmail('')
     setNewRole('viewer')
   }
 
@@ -61,6 +63,13 @@ export function UserManagementModal({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="New user name"
+            className="flex-1 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder="Email (optional)"
             className="flex-1 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <select

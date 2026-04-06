@@ -57,6 +57,23 @@ beforeEach(() => {
   vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
 })
 
+describe('NewApiPage — suggestion badge', () => {
+  it('shows Suggestion badge in the header when role is suggester', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    render(<NewApiPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId('suggestion-badge')).toBeInTheDocument()
+    })
+  })
+
+  it('does not show Suggestion badge for editor role', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    render(<NewApiPage />)
+    await waitFor(() => expect(screen.getByRole('button', { name: /create api/i })).toBeInTheDocument())
+    expect(screen.queryByTestId('suggestion-badge')).not.toBeInTheDocument()
+  })
+})
+
 describe('NewApiPage — suggester path', () => {
   it('shows Create API label for editor role', async () => {
     vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })

@@ -28,9 +28,24 @@ export default function RegisterPage() {
     }
 
     if (data.user) {
+      // Check for a pre-registered slot with the same email (admin pre-registration flow)
+      const { data: preRegistered } = await supabase
+        .from('users')
+        .select('role')
+        .eq('email', email)
+        .neq('id', data.user.id)
+        .single()
+
+      const resolvedRole = preRegistered?.role ?? 'viewer'
+
+      // Remove stale pre-registered slot so the unique email constraint doesn't block the insert
+      if (preRegistered) {
+        await supabase.from('users').delete().eq('email', email).neq('id', data.user.id)
+      }
+
       const { error: insertError } = await supabase
         .from('users')
-        .insert({ id: data.user.id, name, role: 'editor' })
+        .insert({ id: data.user.id, name, email, role: resolvedRole })
 
       if (insertError) {
         setError(insertError.message)

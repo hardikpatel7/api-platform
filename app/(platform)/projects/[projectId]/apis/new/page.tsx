@@ -60,7 +60,17 @@ export default function NewApiPage() {
           >
             ← Back
           </button>
-          <h1 className="text-xl font-semibold">New API</h1>
+          <h1 className="text-xl font-semibold flex items-center gap-2">
+            New API
+            {isSuggester && (
+              <span
+                data-testid="suggestion-badge"
+                className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+              >
+                Suggestion
+              </span>
+            )}
+          </h1>
         </div>
         <ApiForm
           onSubmit={handleSubmit}

@@ -128,7 +128,17 @@ export default function ApiDetailPage() {
             >
               ← Back
             </button>
-            <h1 className="text-xl font-semibold">{entry.name}</h1>
+            <h1 className="text-xl font-semibold flex items-center gap-2">
+              {entry.name}
+              {editing && role && !canDo(role, 'direct_edit') && (
+                <span
+                  data-testid="suggestion-badge"
+                  className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+                >
+                  Suggestion
+                </span>
+              )}
+            </h1>
           </div>
           <div className="flex gap-2">
             {editing ? (

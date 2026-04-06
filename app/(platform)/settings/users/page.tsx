@@ -54,11 +54,11 @@ export default function SettingsUsersPage() {
     }
   }
 
-  async function handleAddUser(name: string, userRole: UserRole) {
+  async function handleAddUser(name: string, userRole: UserRole, email: string) {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('users')
-      .insert({ name, role: userRole })
+      .insert({ name, role: userRole, ...(email ? { email } : {}) })
       .select()
       .single()
     if (!error && data) {

@@ -47,6 +47,7 @@ export type ApiEntry = {
 export type User = {
   id: string;
   name: string;
+  email?: string;
   role: UserRole;
   created_at: string;
 };

@@ -167,6 +167,31 @@ describe('ApiDetailPage — history events', () => {
   })
 })
 
+describe('ApiDetailPage — suggestion badge', () => {
+  it('shows Suggestion badge when suggester opens the edit form', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+
+    render(<ApiDetailPage />)
+    await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest Edit' }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('suggestion-badge')).toBeInTheDocument()
+    })
+  })
+
+  it('does not show Suggestion badge for editor edit mode', async () => {
+    render(<ApiDetailPage />) // role is 'editor' by default
+    await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument())
+    expect(screen.queryByTestId('suggestion-badge')).not.toBeInTheDocument()
+  })
+})
+
 describe('ApiDetailPage — suggester routing', () => {
   it('calls submitSuggestionAction with type delete when suggester clicks Suggest Delete', async () => {
     vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
