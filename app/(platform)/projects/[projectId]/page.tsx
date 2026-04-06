@@ -58,20 +58,34 @@ export default function ProjectPage() {
         .order('created_at', { ascending: false })
       if (projs) setProjects(projs as Project[])
 
-      // Load pending suggestions
-      const { data: pending } = await supabase
+      // Load pending suggestions — api_id badges always based on all pending
+      const { data: pendingAll } = await supabase
         .from('suggestions')
         .select('id, api_id')
         .eq('status', 'pending')
-      if (pending) {
-        setPendingSuggestionCount(pending.length)
-        setPendingApiIds(new Set(pending.map((s: { api_id: string | null }) => s.api_id).filter(Boolean) as string[]))
+      if (pendingAll) {
+        setPendingApiIds(new Set(pendingAll.map((s: { api_id: string | null }) => s.api_id).filter(Boolean) as string[]))
       }
 
       setLoading(false)
     }
     load()
   }, [projectId])
+
+  useEffect(() => {
+    if (!role) return
+    async function loadPendingCount() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      let query = supabase.from('suggestions').select('id').eq('status', 'pending')
+      if (role === 'suggester' && user?.id) {
+        query = query.eq('user_id', user.id)
+      }
+      const { data: pending } = await query
+      if (pending) setPendingSuggestionCount(pending.length)
+    }
+    loadPendingCount()
+  }, [role])
 
   async function handleSearchResults(ids: string[] | null) {
     setSearchResultIds(ids)

@@ -15,6 +15,8 @@ vi.mock('@/hooks/useRole', () => ({
   useRole: vi.fn(() => ({ role: 'editor', loading: false })),
 }))
 
+import { useRole } from '@/hooks/useRole'
+
 const stableApis: never[] = []
 vi.mock('@/store/apiStore', () => ({
   useApiStore: vi.fn(() => ({
@@ -24,8 +26,20 @@ vi.mock('@/store/apiStore', () => ({
   })),
 }))
 
+vi.mock('@/store/projectStore', () => ({
+  useProjectStore: vi.fn(() => ({
+    projects: [{ id: 'p1', name: 'Alpha', created_by: 'u1', created_at: '2024-01-01T00:00:00Z' }],
+    setProjects: vi.fn(),
+  })),
+}))
+
 vi.mock('@/app/actions/generate', () => ({
   generateApiDocsAction: vi.fn(),
+}))
+
+const mockSubmitSuggestion = vi.fn()
+vi.mock('@/app/actions/submitSuggestion', () => ({
+  submitSuggestionAction: (...args: unknown[]) => mockSubmitSuggestion(...args),
 }))
 
 const mockFrom = vi.fn()
@@ -64,6 +78,10 @@ const testHistoryEvent = {
 }
 
 beforeEach(() => {
+  vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+  mockSubmitSuggestion.mockReset()
+  mockSubmitSuggestion.mockResolvedValue(undefined)
+
   vi.mocked(mockFrom).mockImplementation((table: string) => {
     if (table === 'api_entries') {
       return {
@@ -145,6 +163,55 @@ describe('ApiDetailPage — history events', () => {
 
     await waitFor(() => {
       expect(screen.getByText('No history recorded yet.')).toBeInTheDocument()
+    })
+  })
+})
+
+describe('ApiDetailPage — suggester routing', () => {
+  it('calls submitSuggestionAction with type delete when suggester clicks Suggest Delete', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    render(<ApiDetailPage />)
+    await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest Delete' }))
+
+    await waitFor(() => {
+      expect(mockSubmitSuggestion).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'delete', apiId: 'api-1' })
+      )
+    })
+  })
+
+  it('shows Submit Suggestion label on the edit form when role is suggester', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+
+    render(<ApiDetailPage />)
+    await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest Edit' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Submit Suggestion' })).toBeInTheDocument()
+    })
+  })
+
+  it('calls submitSuggestionAction with type edit when suggester submits the edit form', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+
+    render(<ApiDetailPage />)
+    await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Suggest Edit' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Submit Suggestion' })).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Suggestion' }))
+
+    await waitFor(() => {
+      expect(mockSubmitSuggestion).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'edit', apiId: 'api-1' })
+      )
     })
   })
 })

@@ -3,16 +3,37 @@
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useApiStore } from '@/store/apiStore'
+import { useProjectStore } from '@/store/projectStore'
 import { ApiForm } from '@/components/api/ApiForm'
 import { generateApiDocsAction } from '@/app/actions/generate'
+import { submitSuggestionAction } from '@/app/actions/submitSuggestion'
+import { useRole } from '@/hooks/useRole'
+import { canDo } from '@/lib/permissions'
 import type { ApiEntry } from '@/types'
 
 export default function NewApiPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const router = useRouter()
   const { addApi } = useApiStore()
+  const { projects } = useProjectStore()
+  const { role } = useRole()
+  const projectName = projects.find((p) => p.id === projectId)?.name ?? ''
+  const isSuggester = !!(role && !canDo(role, 'direct_edit') && canDo(role, 'suggest'))
 
   async function handleSubmit(data: Partial<ApiEntry>) {
+    if (isSuggester) {
+      await submitSuggestionAction({
+        type: 'create',
+        projectId,
+        apiId: null,
+        payload: data,
+        apiName: (data.name as string) ?? '',
+        projectName,
+      })
+      router.push(`/projects/${projectId}`)
+      return
+    }
+
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -41,7 +62,11 @@ export default function NewApiPage() {
           </button>
           <h1 className="text-xl font-semibold">New API</h1>
         </div>
-        <ApiForm onSubmit={handleSubmit} submitLabel="Create API" onGenerate={generateApiDocsAction} />
+        <ApiForm
+          onSubmit={handleSubmit}
+          submitLabel={isSuggester ? 'Submit Suggestion' : 'Create API'}
+          onGenerate={!isSuggester ? generateApiDocsAction : undefined}
+        />
       </div>
     </main>
   )

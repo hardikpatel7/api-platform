@@ -91,4 +91,13 @@ describe('SuggestionsPage', () => {
       expect(mockPush).toHaveBeenCalledWith('/')
     })
   })
+
+  it('shows Withdraw button for own pending suggestion when role is suggester', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+
+    render(<SuggestionsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /withdraw/i })).toBeInTheDocument()
+    })
+  })
 })

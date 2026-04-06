@@ -2,11 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockInsert = vi.fn()
 const mockGetUser = vi.fn()
+const mockUserSingle = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: () => ({
     auth: { getUser: mockGetUser },
-    from: () => ({ insert: mockInsert }),
+    from: (table: string) => {
+      if (table === 'users') {
+        return { select: () => ({ eq: () => ({ single: mockUserSingle }) }) }
+      }
+      return { insert: mockInsert }
+    },
   }),
 }))
 
@@ -20,7 +26,9 @@ const { submitSuggestionAction } = await import('@/app/actions/submitSuggestion'
 beforeEach(() => {
   mockInsert.mockReset()
   mockGetUser.mockReset()
+  mockUserSingle.mockReset()
   mockInsert.mockResolvedValue({ error: null })
+  mockUserSingle.mockResolvedValue({ data: { name: 'Alice' }, error: null })
 })
 
 describe('submitSuggestionAction', () => {
@@ -46,6 +54,28 @@ describe('submitSuggestionAction', () => {
         user_id: 'u1',
         payload: { name: 'List Users' },
         original: { name: 'Get Users' },
+      })
+    )
+  })
+
+  it('includes api_name, project_name, and user_name in the insert', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    mockUserSingle.mockResolvedValue({ data: { name: 'Alice' }, error: null })
+
+    await submitSuggestionAction({
+      type: 'edit',
+      projectId: 'p1',
+      apiId: 'a1',
+      payload: { name: 'List Users' },
+      apiName: 'Get Users',
+      projectName: 'Alpha',
+    })
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        api_name: 'Get Users',
+        project_name: 'Alpha',
+        user_name: 'Alice',
       })
     )
   })

@@ -15,6 +15,7 @@ export default function SuggestionsPage() {
   const router = useRouter()
   const { role, loading } = useRole()
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>()
 
   useEffect(() => {
     if (!loading && role && !canDo(role, 'suggest')) {
@@ -24,6 +25,8 @@ export default function SuggestionsPage() {
     if (!loading && role) {
       async function load() {
         const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        setCurrentUserId(user?.id)
         const { data } = await supabase
           .from('suggestions')
           .select('*')
@@ -43,6 +46,7 @@ export default function SuggestionsPage() {
         <SuggestionPanel
           suggestions={suggestions}
           role={role}
+          currentUserId={currentUserId}
           onApprove={(id) => approveSuggestionAction(id)}
           onReject={(id, note) => rejectSuggestionAction(id, note)}
           onWithdraw={(id) => withdrawSuggestionAction(id)}

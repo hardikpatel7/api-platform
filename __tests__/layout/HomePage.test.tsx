@@ -43,11 +43,24 @@ vi.mock('@/lib/supabase/client', () => ({
 
 import { useRole } from '@/hooks/useRole'
 
+// A chainable/awaitable eq result — supports .eq(...).eq(...) and await .eq(...)
+const makeEqChain = (): {
+  data: null
+  error: null
+  eq: () => Promise<{ data: null; error: null }>
+  then: (resolve: (v: { data: null; error: null }) => unknown) => Promise<unknown>
+} => ({
+  data: null,
+  error: null,
+  eq: () => Promise.resolve({ data: null, error: null }),
+  then: (resolve) => Promise.resolve({ data: null, error: null }).then(resolve),
+})
+
 beforeEach(() => {
   vi.mocked(mockFrom).mockReturnValue({
     select: () => ({
       order: () => ({ data: [], error: null }),
-      eq: () => ({ data: null, error: null }),
+      eq: () => makeEqChain(),
     }),
   })
 })

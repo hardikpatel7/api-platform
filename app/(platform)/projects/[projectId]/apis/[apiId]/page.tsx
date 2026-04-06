@@ -8,15 +8,19 @@ import { ApiForm } from '@/components/api/ApiForm'
 import { ApiDetailTabs } from '@/components/api/ApiDetailTabs'
 import { ApiDetailActions } from '@/components/api/ApiDetailActions'
 import { generateApiDocsAction } from '@/app/actions/generate'
+import { submitSuggestionAction } from '@/app/actions/submitSuggestion'
 import { useRole } from '@/hooks/useRole'
 import { canDo } from '@/lib/permissions'
+import { useProjectStore } from '@/store/projectStore'
 import type { ApiEntry, HistoryEntry } from '@/types'
 
 export default function ApiDetailPage() {
   const { projectId, apiId } = useParams<{ projectId: string; apiId: string }>()
   const router = useRouter()
   const { apis, updateApi, removeApi } = useApiStore()
+  const { projects } = useProjectStore()
   const { role } = useRole()
+  const projectName = projects.find((p) => p.id === projectId)?.name ?? ''
   const [entry, setEntry] = useState<ApiEntry | null>(null)
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -78,6 +82,34 @@ export default function ApiDetailPage() {
     router.push(`/projects/${projectId}`)
   }
 
+  async function handleSuggestDelete() {
+    if (!entry || !confirm('Suggest deletion of this API entry?')) return
+    await submitSuggestionAction({
+      type: 'delete',
+      projectId: entry.project_id,
+      apiId: entry.id,
+      payload: null,
+      original: entry,
+      apiName: entry.name,
+      projectName,
+    })
+    router.push(`/projects/${projectId}`)
+  }
+
+  async function handleSuggestEdit(data: Partial<ApiEntry>) {
+    if (!entry) return
+    await submitSuggestionAction({
+      type: 'edit',
+      projectId: entry.project_id,
+      apiId: entry.id,
+      payload: data,
+      original: entry,
+      apiName: entry.name,
+      projectName,
+    })
+    setEditing(false)
+  }
+
   if (loading) {
     return <main className="flex-1 p-6"><p className="text-sm text-muted-foreground">Loading…</p></main>
   }
@@ -112,7 +144,7 @@ export default function ApiDetailPage() {
                 onEdit={() => setEditing(true)}
                 onDelete={handleDelete}
                 onSuggestEdit={() => setEditing(true)}
-                onSuggestDelete={handleDelete}
+                onSuggestDelete={handleSuggestDelete}
               />
             ) : null}
           </div>
@@ -121,8 +153,8 @@ export default function ApiDetailPage() {
         {editing ? (
           <ApiForm
             initialData={entry}
-            onSubmit={handleSave}
-            submitLabel="Save changes"
+            onSubmit={role && canDo(role, 'direct_edit') ? handleSave : handleSuggestEdit}
+            submitLabel={role && canDo(role, 'direct_edit') ? 'Save changes' : 'Submit Suggestion'}
             onGenerate={role && canDo(role, 'use_ai') ? generateApiDocsAction : undefined}
           />
         ) : (

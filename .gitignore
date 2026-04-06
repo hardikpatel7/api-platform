@@ -36,3 +36,8 @@ next-env.d.ts
 # editor / tool config
 .obsidian/
 .claude/
+
+# internal dev artifacts
+CLAUDE.md
+docs/
+**/_context.md

@@ -42,17 +42,25 @@ export default function HomePage() {
         setApiCounts(map)
       }
 
-      // Load pending suggestion count
-      const { data: pending } = await supabase
-        .from('suggestions')
-        .select('id')
-        .eq('status', 'pending')
-      if (pending) setPendingSuggestionCount(pending.length)
-
       setLoading(false)
     }
     load()
   }, [])
+
+  useEffect(() => {
+    if (!role) return
+    async function loadPendingCount() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      let query = supabase.from('suggestions').select('id').eq('status', 'pending')
+      if (role === 'suggester' && user?.id) {
+        query = query.eq('user_id', user.id)
+      }
+      const { data: pending } = await query
+      if (pending) setPendingSuggestionCount(pending.length)
+    }
+    loadPendingCount()
+  }, [role])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()

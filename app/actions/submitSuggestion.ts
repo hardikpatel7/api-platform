@@ -27,11 +27,21 @@ export async function submitSuggestionAction(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
+  const { data: userData } = await supabase
+    .from('users')
+    .select('name')
+    .eq('id', user.id)
+    .single()
+  const userName = userData?.name ?? 'Unknown'
+
   const { error } = await supabase.from('suggestions').insert({
     type: input.type,
     project_id: input.projectId,
+    project_name: input.projectName,
     api_id: input.apiId,
+    api_name: input.apiName,
     user_id: user.id,
+    user_name: userName,
     payload: input.payload,
     original: input.original ?? null,
     status: 'pending',
