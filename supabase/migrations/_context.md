@@ -24,5 +24,7 @@ SQL-only migration files. All schema changes go here — never use the Supabase 
 
 ## Edge Cases
 - Migration 004 drops the stub policies from 002 before creating new ones — safe to run sequentially.
+- Migration 007 uses `drop policy if exists` before recreating — safe to re-run.
 - The history trigger uses `set_config('app.user_id', ...)` context injected by the application before each mutation for accurate user attribution.
 - `suggestions.api_id` ON DELETE SET NULL — if an API entry is deleted, the suggestion loses its `api_id` but is retained for audit purposes.
+- `suggestions.api_id` is back-filled by `approveSuggestionAction` for create-type suggestions after the new `api_entries` row is inserted.
