@@ -11,6 +11,8 @@ SQL-only migration files. All schema changes go here — never use the Supabase 
 | `003_suggestions_history.sql` | `suggestions` + `history_events` tables; RLS enabled (policies in 004) |
 | `004_rls_policies.sql` | Role-scoped RLS replacing the stubs from 002. Uses `current_user_role()` helper (security definer). Admins manage users; editors/admins mutate api_entries and projects; suggesters insert/withdraw suggestions; all roles read everything. |
 | `005_triggers.sql` | (a) First-user admin trigger: first INSERT into `users` sets `role = 'admin'`. (b) History audit trigger: every INSERT/UPDATE/DELETE on `api_entries` writes a row to `history_events`, trims to 500 events per api_id. |
+| `006_users_email.sql` | Adds `email` column (unique) to `users` for admin pre-registration linking. |
+| `007_fix_rls.sql` | Three RLS gap fixes: (a) `history_events_insert` opened to all authenticated roles so suggesters can log `suggested_*` events; (b) `suggestions_select` restricted so suggesters only see their own suggestions; (c) `users_delete_preregistered_self` policy added + `current_user_email()` helper so new signups can delete the orphan pre-registered slot. |
 
 ## Local Decisions
 - History is append-only — no UPDATE or DELETE on `history_events`.

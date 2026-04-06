@@ -23,6 +23,7 @@ export async function approveSuggestionAction(
   const s = suggestion as Suggestion
 
   // Apply the mutation to api_entries based on suggestion type
+  let createdApiId: string | undefined
   if (s.type === 'edit' && s.api_id) {
     const { error } = await supabase
       .from('api_entries')
@@ -30,10 +31,13 @@ export async function approveSuggestionAction(
       .eq('id', s.api_id)
     if (error) return { error: error.message }
   } else if (s.type === 'create') {
-    const { error } = await supabase
+    const { data: created, error } = await supabase
       .from('api_entries')
       .insert(s.payload as Record<string, unknown>)
+      .select('id')
+      .single()
     if (error) return { error: error.message }
+    createdApiId = created?.id
   } else if (s.type === 'delete' && s.api_id) {
     const { error } = await supabase
       .from('api_entries')
@@ -42,7 +46,7 @@ export async function approveSuggestionAction(
     if (error) return { error: error.message }
   }
 
-  // Mark the suggestion as approved
+  // Mark the suggestion as approved; back-fill api_id for create-type suggestions
   const { data: reviewer } = await supabase
     .from('users')
     .select('name')
@@ -56,6 +60,7 @@ export async function approveSuggestionAction(
       reviewed_by: user.id,
       reviewer_name: reviewer?.name ?? '',
       reviewed_at: new Date().toISOString(),
+      ...(createdApiId ? { api_id: createdApiId } : {}),
     })
     .eq('id', suggestionId)
 
@@ -63,7 +68,7 @@ export async function approveSuggestionAction(
 
   await logHistoryAction({
     action: 'suggestion_approved',
-    apiId: s.api_id ?? undefined,
+    apiId: createdApiId ?? s.api_id ?? '',
     apiName: s.api_name,
     projectId: s.project_id,
     projectName: s.project_name,

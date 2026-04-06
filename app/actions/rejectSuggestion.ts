@@ -2,22 +2,24 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { logHistoryAction } from '@/lib/logHistory'
-
-interface SuggestionContext {
-  apiId: string
-  apiName: string
-  projectId: string
-  projectName: string
-}
+import type { Suggestion } from '@/types'
 
 export async function rejectSuggestionAction(
   suggestionId: string,
   note: string,
-  context?: SuggestionContext
 ): Promise<{ error: string } | undefined> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
+
+  // Fetch the suggestion to get context for history logging
+  const { data: suggestion, error: fetchError } = await supabase
+    .from('suggestions')
+    .select('*')
+    .eq('id', suggestionId)
+    .single()
+  if (fetchError || !suggestion) return { error: fetchError?.message ?? 'Suggestion not found' }
+  const s = suggestion as Suggestion
 
   const { data: reviewer } = await supabase
     .from('users')
@@ -38,14 +40,12 @@ export async function rejectSuggestionAction(
 
   if (error) return { error: error.message }
 
-  if (context) {
-    await logHistoryAction({
-      action: 'suggestion_rejected',
-      apiId: context.apiId,
-      apiName: context.apiName,
-      projectId: context.projectId,
-      projectName: context.projectName,
-      detail: `Rejected suggestion for: ${context.apiName}`,
-    })
-  }
+  await logHistoryAction({
+    action: 'suggestion_rejected',
+    apiId: s.api_id ?? '',
+    apiName: s.api_name,
+    projectId: s.project_id,
+    projectName: s.project_name,
+    detail: `Rejected suggestion for: ${s.api_name}`,
+  })
 }

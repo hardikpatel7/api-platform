@@ -175,7 +175,7 @@ History is append-only. Never update or delete history rows.
 ---
 
 ## Build Status
-**All 4 phases complete** (as of 2026-04-06). 352 tests across 43 test files.
+**All 4 phases complete** (as of 2026-04-06). 358 tests across 43 test files.
 
 | Phase | Status |
 |---|---|
@@ -183,6 +183,13 @@ History is append-only. Never update or delete history rows.
 | 2 — Import & AI | ✅ OpenAPI + HAR import, AI Generate, Semantic Search (cross-project) |
 | 3 — Collaboration | ✅ Roles, RLS, suggestion workflow, user management |
 | 4 — History/audit | ✅ history_events, HistoryFeed tab, Postgres trigger, app-level logging |
+
+### Post-build RLS audit fixes (2026-04-06, migration 007)
+- `history_events_insert` policy expanded to all authenticated roles — suggesters were silently blocked from logging `suggested_*` events
+- `suggestions_select` policy restricted so suggesters only see their own suggestions
+- `users_delete_preregistered_self` policy added — new signups can now clean up the orphan pre-registered slot during sign-up
+- `rejectSuggestionAction` now always fetches the suggestion and logs history (previously relied on optional caller-supplied context that was never passed)
+- `approveSuggestionAction` now back-fills `api_id` on the suggestion row when approving a create-type suggestion
 
 When starting new work, check the relevant phase doc and the feature's `_context.md` for local decisions and edge cases.
 

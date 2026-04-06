@@ -16,7 +16,13 @@ function makeChain(table: string) {
         : Promise.resolve({ data: null, error: null })
   )
   chain.update = vi.fn(() => chain)
-  chain.insert = vi.fn(() => Promise.resolve({ error: null }))
+  chain.insert = vi.fn(() => {
+    const insertChain: Record<string, unknown> = {}
+    insertChain.select = vi.fn(() => ({
+      single: vi.fn(() => Promise.resolve({ data: { id: 'new-api-id' }, error: null })),
+    }))
+    return insertChain
+  })
   chain.delete = vi.fn(() => chain)
   return chain
 }
