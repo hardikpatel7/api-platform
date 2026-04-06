@@ -74,7 +74,7 @@ All product requirements live in the `/docs` folder. Read these before working o
 │
 ├── store/                    # Zustand stores — one file per domain
 ├── types/                    # index.ts — all shared TypeScript types
-├── hooks/                    # useRole.ts, useSupabaseRealtime.ts
+├── hooks/                    # useRole.ts, useSupabaseRealtime.ts (stub — not yet implemented)
 │
 └── supabase/
     └── migrations/           # SQL only — schema, RLS, triggers in numbered files
@@ -153,7 +153,7 @@ History is append-only. Never update or delete history rows.
 - Use `lib/supabase/server.ts` in Server Components and Route Handlers
 - Use `lib/supabase/client.ts` in Client Components
 - All schema changes go through numbered migration files — never use the Supabase dashboard to alter schema in production
-- Realtime subscriptions live in `hooks/useSupabaseRealtime.ts` — used for suggestion queue live updates
+- `hooks/useSupabaseRealtime.ts` is a stub (not yet implemented) — suggestion queues refresh on page mount rather than live. Realtime is a roadmap item.
 
 ---
 
