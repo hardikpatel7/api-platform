@@ -19,39 +19,19 @@ export default function RegisterPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+    // The public.users row is created automatically by the on_auth_user_created
+    // database trigger (migration 008). Name is passed via user metadata so the
+    // trigger can store it. Pre-registration role resolution also happens in the trigger.
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    })
 
     if (signUpError) {
       setError(signUpError.message)
       setLoading(false)
       return
-    }
-
-    if (data.user) {
-      // Check for a pre-registered slot with the same email (admin pre-registration flow)
-      const { data: preRegistered } = await supabase
-        .from('users')
-        .select('role')
-        .eq('email', email)
-        .neq('id', data.user.id)
-        .single()
-
-      const resolvedRole = preRegistered?.role ?? 'viewer'
-
-      // Remove stale pre-registered slot so the unique email constraint doesn't block the insert
-      if (preRegistered) {
-        await supabase.from('users').delete().eq('email', email).neq('id', data.user.id)
-      }
-
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert({ id: data.user.id, name, email, role: resolvedRole })
-
-      if (insertError) {
-        setError(insertError.message)
-        setLoading(false)
-        return
-      }
     }
 
     router.push('/')

@@ -13,6 +13,7 @@ SQL-only migration files. All schema changes go here — never use the Supabase 
 | `005_triggers.sql` | (a) First-user admin trigger: first INSERT into `users` sets `role = 'admin'`. (b) History audit trigger: every INSERT/UPDATE/DELETE on `api_entries` writes a row to `history_events`, trims to 500 events per api_id. |
 | `006_users_email.sql` | Adds `email` column (unique) to `users` for admin pre-registration linking. |
 | `007_fix_rls.sql` | Three RLS gap fixes: (a) `history_events_insert` opened to all authenticated roles so suggesters can log `suggested_*` events; (b) `suggestions_select` restricted so suggesters only see their own suggestions; (c) `users_delete_preregistered_self` policy added + `current_user_email()` helper so new signups can delete the orphan pre-registered slot. |
+| `008_auth_trigger.sql` | `on_auth_user_created` trigger on `auth.users` — auto-creates the `public.users` row on every signup. Fixes free signup when Supabase email confirmation is enabled (browser client has no session at that point, so application-level inserts via `register/page.tsx` failed the `users_insert_self` RLS policy). Also moves pre-registration role resolution and slot cleanup into the DB layer. Name is read from `raw_user_meta_data->>'name'`, set via `signUp({ options: { data: { name } } })`. |
 
 ## Local Decisions
 - History is append-only — no UPDATE or DELETE on `history_events`.
