@@ -27,6 +27,8 @@ None of these were built for a world where AI agents are calling your APIs auton
 
 API Platform is built from the ground up around a single insight: **the most valuable documentation asset is no longer a schema — it is a semantic description that an LLM can reason about.**
 
+![Platform Documentation Lifecycle](public/diagrams/platform-flow.png)
+
 ### 1. LLM-First Tool Descriptions
 
 Every API entry carries a `tool_description` — a curated, natural language paragraph that describes what the endpoint does, when to use it, and what behaviours to be aware of. This is the field that gets injected into an agent's context window. It is first-class, not an afterthought.
@@ -82,6 +84,8 @@ The platform has a four-role permission model (Viewer, Suggester, Editor, Admin)
 - **Suggesters** (technical writers, PMs, QA) propose changes without touching live docs
 - **Editors** (senior engineers, tech leads) review field-level diffs and approve or reject with notes
 - **Admins** manage team membership and roles
+
+![Suggestion & Approval Workflow](public/diagrams/suggestion-workflow.png)
 
 Every change — direct or approved suggestion — is recorded in an append-only audit trail tied to each API entry. You can see exactly who changed what, when, and why.
 
