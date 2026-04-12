@@ -8,6 +8,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { useRole } from '@/hooks/useRole'
 import { canDo } from '@/lib/permissions'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { FolderOpen } from 'lucide-react'
 import type { Project } from '@/types'
 
 export default function HomePage() {
@@ -165,14 +166,14 @@ export default function HomePage() {
           ) : projects.length === 0 ? (
             role && canDo(role, 'direct_edit') ? (
               <EmptyState
-                icon="📁"
+                icon={<FolderOpen className="w-5 h-5" />}
                 title="No projects yet"
                 description="Create your first project to start documenting APIs and sharing them with your team."
                 actions={[{ label: '+ New project', variant: 'primary', onClick: () => setShowCreate(true) }]}
               />
             ) : (
               <EmptyState
-                icon="📁"
+                icon={<FolderOpen className="w-5 h-5" />}
                 title="No projects yet"
                 description="Ask your admin to create a project and you'll see it here."
               />
@@ -182,7 +183,7 @@ export default function HomePage() {
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 cursor-pointer"
+                  className="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md hover:shadow-black/30"
                   onClick={() => router.push(`/projects/${project.id}`)}
                 >
                   <div>

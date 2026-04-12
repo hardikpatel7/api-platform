@@ -3,6 +3,7 @@
 import { getActionColor, getActionLabel, type ActionColor } from '@/lib/history'
 import type { HistoryEntry } from '@/types'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Clock } from 'lucide-react'
 
 const DOT_CLASSES: Record<ActionColor, string> = {
   green:  'bg-green-500',
@@ -20,7 +21,7 @@ export function HistoryFeed({ events }: HistoryFeedProps) {
   if (events.length === 0) {
     return (
       <EmptyState
-        icon="🕐"
+        icon={<Clock className="w-5 h-5" />}
         title="No history yet"
         description="Changes to this API will be logged here automatically."
       />

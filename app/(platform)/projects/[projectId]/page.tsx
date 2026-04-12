@@ -16,6 +16,7 @@ import { useRole } from '@/hooks/useRole'
 import { bulkImportAction } from '@/app/actions/bulkImport'
 import type { ApiEntry, Project } from '@/types'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Plug } from 'lucide-react'
 import { canDo } from '@/lib/permissions'
 
 export default function ProjectPage() {
@@ -168,7 +169,7 @@ export default function ProjectPage() {
             ) : apis.length === 0 ? (
               role && canDo(role, 'direct_edit') ? (
                 <EmptyState
-                  icon="🔌"
+                  icon={<Plug className="w-5 h-5" />}
                   title="No APIs yet"
                   description="Add your first API entry manually, or import from an OpenAPI spec or HAR file."
                   actions={[
@@ -179,14 +180,14 @@ export default function ProjectPage() {
                 />
               ) : role === 'suggester' ? (
                 <EmptyState
-                  icon="🔌"
+                  icon={<Plug className="w-5 h-5" />}
                   title="No APIs yet"
                   description="This project has no APIs. You can suggest a new one for editors to review."
                   actions={[{ label: 'Suggest new API', variant: 'primary', onClick: () => router.push(`/projects/${projectId}/apis/new`) }]}
                 />
               ) : (
                 <EmptyState
-                  icon="🔌"
+                  icon={<Plug className="w-5 h-5" />}
                   title="No APIs yet"
                   description="This project has no APIs documented yet."
                 />

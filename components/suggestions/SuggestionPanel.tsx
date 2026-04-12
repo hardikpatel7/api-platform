@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { SuggestionCard } from './SuggestionCard'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { CheckCircle2, Lightbulb, ClipboardList } from 'lucide-react'
 import type { Suggestion, UserRole } from '@/types'
 
 type Tab = 'pending' | 'approved' | 'rejected'
@@ -19,41 +20,41 @@ interface SuggestionPanelProps {
 }
 
 const EMPTY_STATES: Record<Tab, {
-  editor: { icon: string; title: string; description: string }
-  default: { icon: string; title: string; description: string }
+  editor: { icon: React.ReactNode; title: string; description: string }
+  default: { icon: React.ReactNode; title: string; description: string }
 }> = {
   pending: {
     editor: {
-      icon: '✅',
+      icon: <CheckCircle2 className="w-5 h-5" />,
       title: 'All caught up',
       description: 'No pending suggestions right now. Team suggestions will appear here for your review.',
     },
     default: {
-      icon: '💡',
+      icon: <Lightbulb className="w-5 h-5" />,
       title: 'No pending suggestions',
       description: 'Browse API entries and suggest edits or additions for editors to review.',
     },
   },
   approved: {
     editor: {
-      icon: '📋',
+      icon: <ClipboardList className="w-5 h-5" />,
       title: 'No approved suggestions',
       description: 'Approved suggestions will be archived here after editors accept them.',
     },
     default: {
-      icon: '📋',
+      icon: <ClipboardList className="w-5 h-5" />,
       title: 'No approved suggestions',
       description: 'Approved suggestions will be archived here after editors accept them.',
     },
   },
   rejected: {
     editor: {
-      icon: '📋',
+      icon: <ClipboardList className="w-5 h-5" />,
       title: 'No rejected suggestions',
       description: 'Suggestions that were declined will be archived here.',
     },
     default: {
-      icon: '📋',
+      icon: <ClipboardList className="w-5 h-5" />,
       title: 'No rejected suggestions',
       description: 'Suggestions that were declined will be archived here.',
     },

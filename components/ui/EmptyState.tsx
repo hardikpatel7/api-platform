@@ -1,9 +1,10 @@
 'use client'
 
+import React from 'react'
 import type { EmptyStateAction } from '@/types'
 
 interface EmptyStateProps {
-  icon: string
+  icon: React.ReactNode
   title: string
   description: string
   actions?: EmptyStateAction[]
@@ -12,7 +13,7 @@ interface EmptyStateProps {
 export function EmptyState({ icon, title, description, actions }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center text-2xl mb-4">
+      <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center mb-4">
         {icon}
       </div>
       <h3 className="text-sm font-semibold text-foreground mb-1.5">{title}</h3>

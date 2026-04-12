@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { cn } from '@/lib/utils'
 import { HistoryFeed } from '@/components/history/HistoryFeed'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { canDo } from '@/lib/permissions'
+import { Ruler, Settings2, Code2, FileText } from 'lucide-react'
 import type { ApiEntry, HistoryEntry, UserRole } from '@/types'
 
 const METHOD_COLORS: Record<string, string> = {
@@ -144,7 +147,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
       {activeTab === 'schema' && (
         !entry.request_schema && !entry.response_schema ? (
           <EmptyState
-            icon="📐"
+            icon={<Ruler className="w-5 h-5" />}
             title="No schema defined"
             description="Edit this API to add request and response schemas."
             actions={editActions()}
@@ -171,7 +174,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
       {activeTab === 'mcp' && (
         !entry.mcp_config ? (
           <EmptyState
-            icon="⚙️"
+            icon={<Settings2 className="w-5 h-5" />}
             title="No MCP config yet"
             description={role && canDo(role, 'use_ai') ? 'Generate one automatically with AI, or add it manually.' : 'An editor can generate an MCP config for this API.'}
             actions={
@@ -197,7 +200,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
       {activeTab === 'snippet' && (
         !entry.code_snippet ? (
           <EmptyState
-            icon="💻"
+            icon={<Code2 className="w-5 h-5" />}
             title="No code snippet"
             description="Edit this API to add a usage code snippet."
             actions={editActions()}
@@ -208,6 +211,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
             content={entry.code_snippet}
             onCopy={handleCopy}
             copied={copied}
+            language="bash"
           />
         )
       )}
@@ -216,7 +220,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
       {activeTab === 'notes' && (
         !entry.special_notes ? (
           <EmptyState
-            icon="📝"
+            icon={<FileText className="w-5 h-5" />}
             title="No notes yet"
             description="Edit this API to add notes, caveats, or usage tips."
             actions={editActions()}
@@ -239,9 +243,10 @@ interface CodeBlockProps {
   content: string
   onCopy: (text: string) => void
   copied: boolean
+  language?: string
 }
 
-function CodeBlock({ label, content, onCopy, copied }: CodeBlockProps) {
+function CodeBlock({ label, content, onCopy, copied, language = 'json' }: CodeBlockProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -256,9 +261,13 @@ function CodeBlock({ label, content, onCopy, copied }: CodeBlockProps) {
         )}
       </div>
       {content ? (
-        <pre className="text-sm font-mono bg-muted rounded-md p-4 overflow-x-auto whitespace-pre-wrap">
+        <SyntaxHighlighter
+          language={language}
+          style={oneDark}
+          customStyle={{ borderRadius: '0.5rem', fontSize: '0.8125rem', margin: 0 }}
+        >
           {content}
-        </pre>
+        </SyntaxHighlighter>
       ) : (
         <p className="text-sm text-muted-foreground">—</p>
       )}

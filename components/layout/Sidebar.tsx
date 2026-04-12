@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { canDo } from '@/lib/permissions'
+import { FolderOpen, Folder, LayoutGrid } from 'lucide-react'
 import type { Project, UserRole } from '@/types'
 
 const STATUS_VALUES = ['Stable', 'Beta', 'Deprecated', 'Internal'] as const
@@ -93,7 +94,8 @@ export function Sidebar({
 
         {/* Projects list */}
         <div className="px-3 mb-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
+            <LayoutGrid className="w-3.5 h-3.5" />
             Projects
           </p>
         </div>
@@ -105,13 +107,19 @@ export function Sidebar({
                 key={project.id}
                 href={`/projects/${project.id}`}
                 className={cn(
-                  'flex items-center justify-between px-2 py-1.5 rounded-md text-sm',
+                  'flex items-center justify-between px-2 py-1.5 rounded-md text-sm border-l-2 transition-all duration-150',
                   isActive
-                    ? 'bg-accent text-accent-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+                    ? 'border-l-2 border-primary bg-primary/10 text-accent-foreground font-medium'
+                    : 'border-l-2 border-transparent text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
                 )}
               >
-                <span className="truncate">{project.name}</span>
+                <span className="flex items-center gap-1.5 min-w-0">
+                  {isActive
+                    ? <FolderOpen className="w-3.5 h-3.5 shrink-0" />
+                    : <Folder className="w-3.5 h-3.5 shrink-0" />
+                  }
+                  <span className="truncate">{project.name}</span>
+                </span>
                 <span className="ml-2 text-xs bg-muted text-muted-foreground rounded px-1.5 py-0.5 shrink-0">
                   {apiCounts[project.id] ?? 0}
                 </span>
