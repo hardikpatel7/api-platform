@@ -60,11 +60,12 @@ beforeEach(() => {
       }
     }
     if (table === 'suggestions') {
-      return {
-        select: () => ({
-          eq: () => ({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
-        }),
+      const chain = {
+        eq: vi.fn(),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       }
+      chain.eq.mockReturnValue(chain)
+      return { select: vi.fn().mockReturnValue(chain) }
     }
     return {}
   })
