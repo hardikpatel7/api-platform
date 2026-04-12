@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ApiDetailTabs } from '@/components/api/ApiDetailTabs'
@@ -20,6 +20,27 @@ const entry: ApiEntry = {
   mcp_config: { name: 'get_items', description: '', inputSchema: { type: 'object', properties: {}, required: [] } },
   code_snippet: 'curl /api/v1/items',
   special_notes: 'Rate limited',
+  created_by: 'u1',
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
+}
+
+const emptyEntry: ApiEntry = {
+  id: 'api-2',
+  project_id: 'p1',
+  name: 'Empty API',
+  endpoint: '/api/v1/empty',
+  method: 'POST',
+  version: null,
+  status: null,
+  group: null,
+  tags: [],
+  tool_description: null,
+  request_schema: null,
+  response_schema: null,
+  mcp_config: null,
+  code_snippet: null,
+  special_notes: null,
   created_by: 'u1',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
@@ -94,5 +115,54 @@ describe('ApiDetailTabs', () => {
     render(<ApiDetailTabs entry={entry} />)
     await user.click(screen.getByRole('tab', { name: /code snippet/i }))
     expect(screen.getByRole('button', { name: /copy/i })).toBeInTheDocument()
+  })
+})
+
+describe('ApiDetailTabs — empty tab states', () => {
+  it('shows EmptyState on Schema tab when both schemas are null', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="editor" onEdit={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /schema/i }))
+    expect(screen.getByText('No schema defined')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit API' })).toBeInTheDocument()
+  })
+
+  it('shows Edit API button on Schema tab for suggester', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="suggester" onEdit={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /schema/i }))
+    expect(screen.getByText('No schema defined')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit API' })).toBeInTheDocument()
+  })
+
+  it('shows no CTA on Schema tab for viewer', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="viewer" onEdit={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /schema/i }))
+    expect(screen.getByText('No schema defined')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit API' })).not.toBeInTheDocument()
+  })
+
+  it('calls onEdit when Edit API is clicked on Schema tab', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    render(<ApiDetailTabs entry={emptyEntry} role="editor" onEdit={onEdit} />)
+    await user.click(screen.getByRole('tab', { name: /schema/i }))
+    await user.click(screen.getByRole('button', { name: 'Edit API' }))
+    expect(onEdit).toHaveBeenCalledOnce()
+  })
+
+  it('shows EmptyState on Code Snippet tab when snippet is null', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="editor" onEdit={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /code snippet/i }))
+    expect(screen.getByText('No code snippet')).toBeInTheDocument()
+  })
+
+  it('shows EmptyState on Notes tab when special_notes is null', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="editor" onEdit={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /notes/i }))
+    expect(screen.getByText('No notes yet')).toBeInTheDocument()
   })
 })

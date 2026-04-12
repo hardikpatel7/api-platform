@@ -168,7 +168,12 @@ export default function ApiDetailPage() {
             onGenerate={role && canDo(role, 'use_ai') ? generateApiDocsAction : undefined}
           />
         ) : (
-          <ApiDetailTabs entry={entry} historyEvents={historyEvents} />
+          <ApiDetailTabs
+            entry={entry}
+            historyEvents={historyEvents}
+            role={role ?? undefined}
+            onEdit={() => setEditing(true)}
+          />
         )}
       </div>
     </main>

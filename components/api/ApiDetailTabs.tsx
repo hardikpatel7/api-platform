@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { HistoryFeed } from '@/components/history/HistoryFeed'
-import type { ApiEntry, HistoryEntry } from '@/types'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { canDo } from '@/lib/permissions'
+import type { ApiEntry, HistoryEntry, UserRole } from '@/types'
 
 const METHOD_COLORS: Record<string, string> = {
   GET: 'bg-blue-100 text-blue-700',
@@ -35,9 +37,12 @@ const TABS: { id: TabId; label: string }[] = [
 interface ApiDetailTabsProps {
   entry: ApiEntry
   historyEvents?: HistoryEntry[]
+  role?: UserRole
+  onEdit?: () => void
+  onGenerate?: () => void
 }
 
-export function ApiDetailTabs({ entry, historyEvents = [] }: ApiDetailTabsProps) {
+export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGenerate }: ApiDetailTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [copied, setCopied] = useState(false)
 
@@ -45,6 +50,11 @@ export function ApiDetailTabs({ entry, historyEvents = [] }: ApiDetailTabsProps)
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function editActions() {
+    if (!role || !onEdit || role === 'viewer') return undefined
+    return [{ label: 'Edit API', variant: 'secondary' as const, onClick: onEdit }]
   }
 
   return (
@@ -130,23 +140,32 @@ export function ApiDetailTabs({ entry, historyEvents = [] }: ApiDetailTabsProps)
 
       {/* Schema */}
       {activeTab === 'schema' && (
-        <div className="space-y-6">
-          <CodeBlock
-            label="Request Schema"
-            content={entry.request_schema ? JSON.stringify(entry.request_schema, null, 2) : ''}
-            onCopy={handleCopy}
-            copied={copied}
+        !entry.request_schema && !entry.response_schema ? (
+          <EmptyState
+            icon="📐"
+            title="No schema defined"
+            description="Edit this API to add request and response schemas."
+            actions={editActions()}
           />
-          <CodeBlock
-            label="Response Schema"
-            content={entry.response_schema ? JSON.stringify(entry.response_schema, null, 2) : ''}
-            onCopy={handleCopy}
-            copied={copied}
-          />
-        </div>
+        ) : (
+          <div className="space-y-6">
+            <CodeBlock
+              label="Request Schema"
+              content={entry.request_schema ? JSON.stringify(entry.request_schema, null, 2) : ''}
+              onCopy={handleCopy}
+              copied={copied}
+            />
+            <CodeBlock
+              label="Response Schema"
+              content={entry.response_schema ? JSON.stringify(entry.response_schema, null, 2) : ''}
+              onCopy={handleCopy}
+              copied={copied}
+            />
+          </div>
+        )
       )}
 
-      {/* MCP Config */}
+      {/* MCP Config — unchanged, Task 7 handles the empty state */}
       {activeTab === 'mcp' && (
         <CodeBlock
           label="MCP Config"
@@ -158,23 +177,37 @@ export function ApiDetailTabs({ entry, historyEvents = [] }: ApiDetailTabsProps)
 
       {/* Code Snippet */}
       {activeTab === 'snippet' && (
-        <CodeBlock
-          label="Code Snippet"
-          content={entry.code_snippet ?? ''}
-          onCopy={handleCopy}
-          copied={copied}
-        />
+        !entry.code_snippet ? (
+          <EmptyState
+            icon="💻"
+            title="No code snippet"
+            description="Edit this API to add a usage code snippet."
+            actions={editActions()}
+          />
+        ) : (
+          <CodeBlock
+            label="Code Snippet"
+            content={entry.code_snippet}
+            onCopy={handleCopy}
+            copied={copied}
+          />
+        )
       )}
 
       {/* Notes */}
       {activeTab === 'notes' && (
-        <div className="prose prose-sm max-w-none">
-          {entry.special_notes ? (
+        !entry.special_notes ? (
+          <EmptyState
+            icon="📝"
+            title="No notes yet"
+            description="Edit this API to add notes, caveats, or usage tips."
+            actions={editActions()}
+          />
+        ) : (
+          <div className="prose prose-sm max-w-none">
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{entry.special_notes}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">No notes.</p>
-          )}
-        </div>
+          </div>
+        )
       )}
 
       {/* History */}
