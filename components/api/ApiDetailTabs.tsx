@@ -55,7 +55,8 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
 
   function editActions() {
     if (!role || !onEdit || role === 'viewer') return undefined
-    return [{ label: 'Edit API', variant: 'secondary' as const, onClick: onEdit }]
+    const label = canDo(role, 'direct_edit') ? 'Edit API' : 'Suggest Edit'
+    return [{ label, variant: 'secondary' as const, onClick: onEdit }]
   }
 
   return (
@@ -172,7 +173,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
           <EmptyState
             icon="⚙️"
             title="No MCP config yet"
-            description="Generate one automatically with AI, or add it manually."
+            description={role && canDo(role, 'use_ai') ? 'Generate one automatically with AI, or add it manually.' : 'An editor can generate an MCP config for this API.'}
             actions={
               role && canDo(role, 'use_ai') && onGenerate
                 ? [

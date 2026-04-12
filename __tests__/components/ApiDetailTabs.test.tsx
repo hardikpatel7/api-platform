@@ -121,12 +121,12 @@ describe('ApiDetailTabs — empty tab states', () => {
     expect(screen.getByRole('button', { name: 'Edit API' })).toBeInTheDocument()
   })
 
-  it('shows Edit API button on Schema tab for suggester', async () => {
+  it('shows Suggest Edit button on Schema tab for suggester', async () => {
     const user = userEvent.setup()
     render(<ApiDetailTabs entry={emptyEntry} role="suggester" onEdit={vi.fn()} />)
     await user.click(screen.getByRole('tab', { name: /schema/i }))
     expect(screen.getByText('No schema defined')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Edit API' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Suggest Edit' })).toBeInTheDocument()
   })
 
   it('shows no CTA on Schema tab for viewer', async () => {
@@ -184,5 +184,14 @@ describe('ApiDetailTabs — empty tab states', () => {
     await user.click(screen.getByRole('tab', { name: /mcp config/i }))
     expect(screen.getByText('No MCP config yet')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '✨ Generate' })).not.toBeInTheDocument()
+  })
+
+  it('shows no CTA on MCP Config tab for viewer', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="viewer" onEdit={vi.fn()} onGenerate={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /mcp config/i }))
+    expect(screen.getByText('No MCP config yet')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '✨ Generate' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit API' })).not.toBeInTheDocument()
   })
 })

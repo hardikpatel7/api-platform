@@ -1,11 +1,6 @@
 'use client'
 
-interface EmptyStateAction {
-  label: string
-  variant: 'primary' | 'secondary' | 'ai'
-  onClick: () => void
-  disabled?: boolean
-}
+import type { EmptyStateAction } from '@/types'
 
 interface EmptyStateProps {
   icon: string

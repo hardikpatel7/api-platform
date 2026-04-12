@@ -1,5 +1,12 @@
 // All shared TypeScript types — import from here, never redefine locally
 
+export interface EmptyStateAction {
+  label: string
+  variant: 'primary' | 'secondary' | 'ai'
+  onClick: () => void
+  disabled?: boolean
+}
+
 export type UserRole = 'viewer' | 'suggester' | 'editor' | 'admin';
 
 export type SuggestionType = 'edit' | 'create' | 'delete';
