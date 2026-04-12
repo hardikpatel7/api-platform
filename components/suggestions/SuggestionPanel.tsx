@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { SuggestionCard } from './SuggestionCard'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { CheckCircle2, Lightbulb, ClipboardList } from 'lucide-react'
+import { CheckCircle2, Lightbulb, ClipboardList, Clock as ClockIcon, XCircle } from 'lucide-react'
 import type { Suggestion, UserRole } from '@/types'
 
 type Tab = 'pending' | 'approved' | 'rejected'
@@ -115,6 +115,9 @@ export function SuggestionPanel({
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
+            {tab === 'pending'  && <ClockIcon className="w-3.5 h-3.5" />}
+            {tab === 'approved' && <CheckCircle2 className="w-3.5 h-3.5" />}
+            {tab === 'rejected' && <XCircle className="w-3.5 h-3.5" />}
             {tab}
             <span data-count className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
               {counts[tab]}

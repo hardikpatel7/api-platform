@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { canDo } from '@/lib/permissions'
-import { FolderOpen, Folder, LayoutGrid } from 'lucide-react'
+import { FolderOpen, Folder, LayoutGrid, MessageSquare, Users } from 'lucide-react'
 import type { Project, UserRole } from '@/types'
 
 const STATUS_VALUES = ['Stable', 'Beta', 'Deprecated', 'Internal'] as const
@@ -203,7 +203,10 @@ export function Sidebar({
               onClick={onOpenSuggestions}
               className="w-full flex items-center justify-between px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
             >
-              <span>Suggestions</span>
+              <span className="flex items-center gap-2">
+                <MessageSquare className="w-3.5 h-3.5" />
+                Suggestions
+              </span>
               {pendingSuggestionCount > 0 && (
                 <span className="text-xs bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
                   {pendingSuggestionCount}
@@ -214,8 +217,9 @@ export function Sidebar({
           {canDo(role, 'manage_users') && (
             <button
               onClick={onOpenUsers}
-              className="w-full flex items-center px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
             >
+              <Users className="w-3.5 h-3.5" />
               Users
             </button>
           )}

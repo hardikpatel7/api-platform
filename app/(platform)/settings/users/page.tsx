@@ -74,7 +74,6 @@ export default function SettingsUsersPage() {
         <UserManagementModal
           users={users}
           currentUserId={currentUserId}
-          onClose={() => router.push('/')}
           onChangeRole={handleChangeRole}
           onDeleteUser={handleDeleteUser}
           onAddUser={handleAddUser}

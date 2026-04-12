@@ -13,7 +13,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/hooks/useRole', () => ({
-  useRole: vi.fn(() => ({ role: 'editor', loading: false })),
+  useRole: vi.fn(() => ({ role: 'editor', loading: false, noAdminExists: false })),
 }))
 
 import { useRole } from '@/hooks/useRole'
@@ -83,7 +83,7 @@ describe('SuggestionsPage', () => {
   })
 
   it('redirects viewer away from suggestions page', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false, noAdminExists: false })
     mockPush.mockClear()
 
     render(<SuggestionsPage />)
@@ -93,7 +93,7 @@ describe('SuggestionsPage', () => {
   })
 
   it('shows Withdraw button for own pending suggestion when role is suggester', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
 
     render(<SuggestionsPage />)
     await waitFor(() => {
@@ -102,7 +102,7 @@ describe('SuggestionsPage', () => {
   })
 
   it('passes onBrowse to SuggestionPanel which navigates to / for suggester', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     mockPush.mockClear()
 
     vi.mocked(mockFrom).mockImplementation((table: string) => {

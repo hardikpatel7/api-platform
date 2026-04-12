@@ -74,7 +74,7 @@ beforeEach(() => {
 
 describe('HomePage — role gating', () => {
   it('shows New project button for editor role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /new project/i })).toBeInTheDocument()
@@ -82,7 +82,7 @@ describe('HomePage — role gating', () => {
   })
 
   it('shows New project button for admin role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /new project/i })).toBeInTheDocument()
@@ -90,7 +90,7 @@ describe('HomePage — role gating', () => {
   })
 
   it('hides New project button for viewer role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /new project/i })).not.toBeInTheDocument()
@@ -98,7 +98,7 @@ describe('HomePage — role gating', () => {
   })
 
   it('hides New project button for suggester role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /new project/i })).not.toBeInTheDocument()
@@ -106,7 +106,7 @@ describe('HomePage — role gating', () => {
   })
 
   it('hides Delete button for viewer role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
@@ -114,7 +114,7 @@ describe('HomePage — role gating', () => {
   })
 
   it('shows Delete button for editor role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
@@ -124,7 +124,7 @@ describe('HomePage — role gating', () => {
 
 describe('HomePage — sidebar navigation', () => {
   it('shows Suggestions link in sidebar for editor', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByText('Suggestions')).toBeInTheDocument()
@@ -132,7 +132,7 @@ describe('HomePage — sidebar navigation', () => {
   })
 
   it('shows Users link in sidebar for admin', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByText(/users/i)).toBeInTheDocument()
@@ -156,7 +156,7 @@ describe('HomePage — empty state', () => {
   })
 
   it('shows empty state hero for editor with New project CTA in content area', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByText('No projects yet')).toBeInTheDocument()
@@ -166,7 +166,7 @@ describe('HomePage — empty state', () => {
   })
 
   it('shows passive empty state for viewer with no create CTA', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByText('No projects yet')).toBeInTheDocument()
@@ -176,7 +176,7 @@ describe('HomePage — empty state', () => {
   })
 
   it('shows passive empty state for suggester with no create CTA', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     render(<HomePage />)
     await waitFor(() => {
       expect(screen.getByText('No projects yet')).toBeInTheDocument()

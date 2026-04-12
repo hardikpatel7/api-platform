@@ -1,3 +1,5 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@1,2,3,4,5,6,7,8,9&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,6 +7,7 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --font-sans: 'Satoshi Variable', system-ui, sans-serif;
     --background: 216 28% 7%;
     --foreground: 210 40% 93%;
     --card: 216 23% 11%;

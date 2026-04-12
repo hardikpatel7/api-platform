@@ -13,7 +13,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/hooks/useRole', () => ({
-  useRole: vi.fn(() => ({ role: 'admin', loading: false })),
+  useRole: vi.fn(() => ({ role: 'admin', loading: false, noAdminExists: false })),
 }))
 
 import { useRole } from '@/hooks/useRole'
@@ -36,7 +36,7 @@ vi.mock('@/lib/supabase/client', () => ({
 }))
 
 beforeEach(() => {
-  vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false })
+  vi.mocked(useRole).mockReturnValue({ role: 'admin', loading: false, noAdminExists: false })
 
   vi.mocked(mockFrom).mockImplementation((table: string) => {
     if (table === 'users') {
@@ -78,7 +78,7 @@ describe('SettingsUsersPage', () => {
   })
 
   it('redirects non-admin away from user management', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     mockPush.mockClear()
 
     render(<SettingsUsersPage />)

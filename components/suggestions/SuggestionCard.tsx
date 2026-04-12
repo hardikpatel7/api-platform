@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { canDo } from '@/lib/permissions'
 import { DiffView } from './DiffView'
+import { Check, X, Undo2 } from 'lucide-react'
 import type { Suggestion, UserRole } from '@/types'
 
 interface SuggestionCardProps {
@@ -88,14 +89,16 @@ export function SuggestionCard({
             <>
               <button
                 onClick={() => onApprove?.(id)}
-                className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded-md hover:opacity-90"
+                className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded-md hover:opacity-90 flex items-center gap-1.5"
               >
+                <Check className="w-3.5 h-3.5" />
                 Approve
               </button>
               <button
                 onClick={() => setRejecting(true)}
-                className="px-3 py-1 text-xs border border-destructive text-destructive rounded-md hover:bg-destructive/10"
+                className="px-3 py-1 text-xs border border-destructive text-destructive rounded-md hover:bg-destructive/10 flex items-center gap-1.5"
               >
+                <X className="w-3.5 h-3.5" />
                 Reject
               </button>
             </>
@@ -122,8 +125,9 @@ export function SuggestionCard({
           {canDo(role, 'suggest') && !canDo(role, 'approve_reject') && isOwn && (
             <button
               onClick={() => onWithdraw?.(id)}
-              className="px-3 py-1 text-xs border rounded-md hover:bg-accent"
+              className="px-3 py-1 text-xs border rounded-md hover:bg-accent flex items-center gap-1.5"
             >
+              <Undo2 className="w-3.5 h-3.5" />
               Withdraw
             </button>
           )}

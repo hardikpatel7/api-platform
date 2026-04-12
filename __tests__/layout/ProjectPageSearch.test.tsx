@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/hooks/useRole', () => ({
-  useRole: vi.fn(() => ({ role: 'editor', loading: false })),
+  useRole: vi.fn(() => ({ role: 'editor', loading: false, noAdminExists: false })),
 }))
 
 vi.mock('@/app/actions/search', () => ({

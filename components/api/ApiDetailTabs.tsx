@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { cn } from '@/lib/utils'
 import { HistoryFeed } from '@/components/history/HistoryFeed'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { canDo } from '@/lib/permissions'
-import { Ruler, Settings2, Code2, FileText } from 'lucide-react'
+import { Ruler, Settings2, Code2, FileText, Info, ArrowUpFromLine, ArrowDownToLine, Cpu, History, MessageSquare } from 'lucide-react'
 import type { ApiEntry, HistoryEntry, UserRole } from '@/types'
 
 const METHOD_COLORS: Record<string, string> = {
@@ -28,13 +28,13 @@ const STATUS_COLORS: Record<string, string> = {
 
 type TabId = 'overview' | 'schema' | 'mcp' | 'snippet' | 'notes' | 'history'
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'schema', label: 'Schema' },
-  { id: 'mcp', label: 'MCP Config' },
-  { id: 'snippet', label: 'Code Snippet' },
-  { id: 'notes', label: 'Notes' },
-  { id: 'history', label: 'History' },
+const TABS: { id: TabId; label: string; icon: ReactNode }[] = [
+  { id: 'overview', label: 'Overview',     icon: <Info className="w-3.5 h-3.5" /> },
+  { id: 'schema',   label: 'Schema',       icon: <ArrowUpFromLine className="w-3.5 h-3.5" /> },
+  { id: 'mcp',      label: 'MCP Config',   icon: <Cpu className="w-3.5 h-3.5" /> },
+  { id: 'snippet',  label: 'Code Snippet', icon: <ArrowDownToLine className="w-3.5 h-3.5" /> },
+  { id: 'notes',    label: 'Notes',        icon: <MessageSquare className="w-3.5 h-3.5" /> },
+  { id: 'history',  label: 'History',      icon: <History className="w-3.5 h-3.5" /> },
 ]
 
 interface ApiDetailTabsProps {
@@ -73,12 +73,13 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
             aria-selected={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+              'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5',
               activeTab === tab.id
                 ? 'border-primary text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             )}
           >
+            {tab.icon}
             {tab.label}
           </button>
         ))}
