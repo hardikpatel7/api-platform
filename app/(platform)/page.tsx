@@ -7,6 +7,7 @@ import { useProjectStore } from '@/store/projectStore'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { useRole } from '@/hooks/useRole'
 import { canDo } from '@/lib/permissions'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { Project } from '@/types'
 
 export default function HomePage() {
@@ -163,7 +164,20 @@ export default function HomePage() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : projects.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No projects yet. Create one to get started.</p>
+            role && canDo(role, 'direct_edit') ? (
+              <EmptyState
+                icon="📁"
+                title="No projects yet"
+                description="Create your first project to start documenting APIs and sharing them with your team."
+                actions={[{ label: '+ New project', variant: 'primary', onClick: () => setShowCreate(true) }]}
+              />
+            ) : (
+              <EmptyState
+                icon="📁"
+                title="No projects yet"
+                description="Ask your admin to create a project and you'll see it here."
+              />
+            )
           ) : (
             <div className="space-y-2">
               {projects.map((project) => (
