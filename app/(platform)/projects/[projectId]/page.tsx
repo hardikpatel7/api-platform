@@ -22,7 +22,7 @@ export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const router = useRouter()
   const { apis, setApis, loading, setLoading } = useApiStore()
-  const { projects, setProjects } = useProjectStore()
+  const { projects, setProjects, apiCounts, mergeApiCount } = useProjectStore()
   const { role } = useRole()
   const [project, setProject] = useState<Project | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
@@ -52,7 +52,10 @@ export default function ProjectPage() {
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false })
-      if (data) setApis(data as ApiEntry[])
+      if (data) {
+        setApis(data as ApiEntry[])
+        mergeApiCount(projectId, data.length)
+      }
 
       const { data: projs } = await supabase
         .from('projects')
@@ -120,8 +123,6 @@ export default function ProjectPage() {
   const showGroupHeaders = !isSearch && apis.some((a) => a.group)
   const allTags = [...new Set(apis.flatMap((a) => a.tags ?? []))]
   const subtitle = buildSubtitle(filtered.length, statusFilter, tagFilter, isSearch)
-  const apiCounts: Record<string, number> = { [projectId]: apis.length }
-
   return (
     <div className="flex flex-1 overflow-hidden">
       <Sidebar

@@ -22,6 +22,8 @@ vi.mock('@/store/projectStore', () => ({
   useProjectStore: vi.fn(() => ({
     projects: [{ id: 'p1', name: 'Alpha', created_by: 'u1', created_at: '2024-01-01T00:00:00Z' }],
     setProjects: vi.fn(),
+    apiCounts: {},
+    mergeApiCount: vi.fn(),
   })),
 }))
 

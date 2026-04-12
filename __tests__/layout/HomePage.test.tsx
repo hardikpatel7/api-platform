@@ -59,6 +59,9 @@ beforeEach(() => {
     removeProject: vi.fn(),
     loading: false,
     setLoading: vi.fn(),
+    apiCounts: {},
+    setApiCounts: vi.fn(),
+    mergeApiCount: vi.fn(),
   })
 
   vi.mocked(mockFrom).mockReturnValue({
@@ -146,6 +149,9 @@ describe('HomePage — empty state', () => {
       removeProject: vi.fn(),
       loading: false,
       setLoading: vi.fn(),
+      apiCounts: {},
+      setApiCounts: vi.fn(),
+      mergeApiCount: vi.fn(),
     })
   })
 

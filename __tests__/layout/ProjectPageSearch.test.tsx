@@ -54,6 +54,8 @@ vi.mock('@/store/projectStore', () => ({
   useProjectStore: vi.fn(() => ({
     projects: stableProjects,
     setProjects: vi.fn(),
+    apiCounts: {},
+    mergeApiCount: vi.fn(),
   })),
 }))
 

@@ -5,7 +5,7 @@ import type { Project } from '@/types'
 
 // Reset store between tests
 beforeEach(() => {
-  useProjectStore.setState({ projects: [], loading: false, error: null })
+  useProjectStore.setState({ projects: [], loading: false, error: null, apiCounts: {} })
 })
 
 const mockProjects: Project[] = [
@@ -72,5 +72,46 @@ describe('projectStore', () => {
       result.current.setError('Failed to load')
     })
     expect(result.current.error).toBe('Failed to load')
+  })
+
+  it('setApiCounts replaces the entire apiCounts map', () => {
+    const { result } = renderHook(() => useProjectStore())
+    act(() => {
+      result.current.setApiCounts({ p1: 5, p2: 3 })
+    })
+    expect(result.current.apiCounts).toEqual({ p1: 5, p2: 3 })
+  })
+
+  it('setApiCounts overwrites a previously set map', () => {
+    const { result } = renderHook(() => useProjectStore())
+    act(() => {
+      result.current.setApiCounts({ p1: 5, p2: 3 })
+    })
+    act(() => {
+      result.current.setApiCounts({ p3: 7 })
+    })
+    expect(result.current.apiCounts).toEqual({ p3: 7 })
+  })
+
+  it('mergeApiCount adds a single project count without losing others', () => {
+    const { result } = renderHook(() => useProjectStore())
+    act(() => {
+      result.current.setApiCounts({ p1: 5, p2: 3 })
+    })
+    act(() => {
+      result.current.mergeApiCount('p3', 10)
+    })
+    expect(result.current.apiCounts).toEqual({ p1: 5, p2: 3, p3: 10 })
+  })
+
+  it('mergeApiCount updates an existing project count', () => {
+    const { result } = renderHook(() => useProjectStore())
+    act(() => {
+      result.current.setApiCounts({ p1: 5 })
+    })
+    act(() => {
+      result.current.mergeApiCount('p1', 8)
+    })
+    expect(result.current.apiCounts).toEqual({ p1: 8 })
   })
 })

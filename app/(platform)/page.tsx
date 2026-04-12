@@ -12,13 +12,12 @@ import type { Project } from '@/types'
 
 export default function HomePage() {
   const router = useRouter()
-  const { projects, setProjects, addProject, removeProject, loading, setLoading } = useProjectStore()
+  const { projects, setProjects, addProject, removeProject, loading, setLoading, apiCounts, setApiCounts } = useProjectStore()
   const { role } = useRole()
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
-  const [apiCounts, setApiCounts] = useState<Record<string, number>>({})
   const [pendingSuggestionCount, setPendingSuggestionCount] = useState(0)
 
   useEffect(() => {
