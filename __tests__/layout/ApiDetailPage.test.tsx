@@ -299,5 +299,14 @@ describe('ApiDetailPage — MCP Generate from empty state', () => {
         expect.objectContaining({ name: 'Get Items', method: 'GET', endpoint: '/api/v1/items' })
       )
     })
+
+    await waitFor(() => {
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tool_description: 'Generated desc',
+          mcp_config: JSON.stringify({ name: 'get_items' }),
+        })
+      )
+    })
   })
 })

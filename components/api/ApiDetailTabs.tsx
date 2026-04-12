@@ -40,9 +40,10 @@ interface ApiDetailTabsProps {
   role?: UserRole
   onEdit?: () => void
   onGenerate?: () => void
+  generating?: boolean
 }
 
-export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGenerate }: ApiDetailTabsProps) {
+export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGenerate, generating = false }: ApiDetailTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [copied, setCopied] = useState(false)
 
@@ -176,7 +177,7 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGener
               role && canDo(role, 'use_ai') && onGenerate
                 ? [
                     ...(onEdit ? [{ label: 'Edit API', variant: 'secondary' as const, onClick: onEdit }] : []),
-                    { label: '✨ Generate', variant: 'ai' as const, onClick: onGenerate },
+                    { label: generating ? 'Generating…' : '✨ Generate', variant: 'ai' as const, onClick: onGenerate, disabled: generating },
                   ]
                 : editActions()
             }

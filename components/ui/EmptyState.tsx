@@ -4,6 +4,7 @@ interface EmptyStateAction {
   label: string
   variant: 'primary' | 'secondary' | 'ai'
   onClick: () => void
+  disabled?: boolean
 }
 
 interface EmptyStateProps {
@@ -28,12 +29,13 @@ export function EmptyState({ icon, title, description, actions }: EmptyStateProp
               key={index}
               type="button"
               onClick={action.onClick}
+              disabled={action.disabled}
               className={
                 action.variant === 'primary'
-                  ? 'px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90'
+                  ? 'px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90 disabled:opacity-50'
                   : action.variant === 'ai'
-                  ? 'px-3 py-1.5 bg-violet-600 text-white rounded-md text-sm font-medium hover:opacity-90'
-                  : 'px-3 py-1.5 border rounded-md text-sm font-medium hover:bg-accent'
+                  ? 'px-3 py-1.5 bg-violet-600 text-white rounded-md text-sm font-medium hover:opacity-90 disabled:opacity-50'
+                  : 'px-3 py-1.5 border rounded-md text-sm font-medium hover:bg-accent disabled:opacity-50'
               }
             >
               {action.label}
