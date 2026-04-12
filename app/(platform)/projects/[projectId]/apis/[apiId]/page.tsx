@@ -110,6 +110,21 @@ export default function ApiDetailPage() {
     setEditing(false)
   }
 
+  async function handleGenerateFromDetail() {
+    if (!entry) return
+    const result = await generateApiDocsAction({
+      name: entry.name,
+      method: entry.method,
+      endpoint: entry.endpoint,
+      requestSchema: entry.request_schema ?? undefined,
+      responseSchema: entry.response_schema ?? undefined,
+    })
+    await handleSave({
+      tool_description: result.tool_description,
+      mcp_config: result.mcp_config,
+    })
+  }
+
   if (loading) {
     return <main className="flex-1 p-6"><p className="text-sm text-muted-foreground">Loading…</p></main>
   }
@@ -173,6 +188,7 @@ export default function ApiDetailPage() {
             historyEvents={historyEvents}
             role={role ?? undefined}
             onEdit={() => setEditing(true)}
+            onGenerate={role && canDo(role, 'use_ai') ? handleGenerateFromDetail : undefined}
           />
         )}
       </div>

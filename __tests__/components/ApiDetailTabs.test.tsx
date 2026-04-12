@@ -159,4 +159,30 @@ describe('ApiDetailTabs — empty tab states', () => {
     await user.click(screen.getByRole('tab', { name: /notes/i }))
     expect(screen.getByText('No notes yet')).toBeInTheDocument()
   })
+
+  it('shows EmptyState with Generate button on MCP Config tab for editor', async () => {
+    const user = userEvent.setup()
+    const onGenerate = vi.fn()
+    render(<ApiDetailTabs entry={emptyEntry} role="editor" onEdit={vi.fn()} onGenerate={onGenerate} />)
+    await user.click(screen.getByRole('tab', { name: /mcp config/i }))
+    expect(screen.getByText('No MCP config yet')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '✨ Generate' })).toBeInTheDocument()
+  })
+
+  it('calls onGenerate when Generate button is clicked on MCP Config tab', async () => {
+    const user = userEvent.setup()
+    const onGenerate = vi.fn()
+    render(<ApiDetailTabs entry={emptyEntry} role="editor" onEdit={vi.fn()} onGenerate={onGenerate} />)
+    await user.click(screen.getByRole('tab', { name: /mcp config/i }))
+    await user.click(screen.getByRole('button', { name: '✨ Generate' }))
+    expect(onGenerate).toHaveBeenCalledOnce()
+  })
+
+  it('shows no Generate button on MCP Config tab for suggester', async () => {
+    const user = userEvent.setup()
+    render(<ApiDetailTabs entry={emptyEntry} role="suggester" onEdit={vi.fn()} onGenerate={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: /mcp config/i }))
+    expect(screen.getByText('No MCP config yet')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '✨ Generate' })).not.toBeInTheDocument()
+  })
 })

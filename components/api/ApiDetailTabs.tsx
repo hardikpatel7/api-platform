@@ -39,9 +39,10 @@ interface ApiDetailTabsProps {
   historyEvents?: HistoryEntry[]
   role?: UserRole
   onEdit?: () => void
+  onGenerate?: () => void
 }
 
-export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit }: ApiDetailTabsProps) {
+export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGenerate }: ApiDetailTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [copied, setCopied] = useState(false)
 
@@ -164,14 +165,30 @@ export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit }: ApiDe
         )
       )}
 
-      {/* MCP Config — unchanged, Task 7 handles the empty state */}
+      {/* MCP Config */}
       {activeTab === 'mcp' && (
-        <CodeBlock
-          label="MCP Config"
-          content={entry.mcp_config ? JSON.stringify(entry.mcp_config, null, 2) : ''}
-          onCopy={handleCopy}
-          copied={copied}
-        />
+        !entry.mcp_config ? (
+          <EmptyState
+            icon="⚙️"
+            title="No MCP config yet"
+            description="Generate one automatically with AI, or add it manually."
+            actions={
+              role && canDo(role, 'use_ai') && onGenerate
+                ? [
+                    ...(onEdit ? [{ label: 'Edit API', variant: 'secondary' as const, onClick: onEdit }] : []),
+                    { label: '✨ Generate', variant: 'ai' as const, onClick: onGenerate },
+                  ]
+                : editActions()
+            }
+          />
+        ) : (
+          <CodeBlock
+            label="MCP Config"
+            content={JSON.stringify(entry.mcp_config, null, 2)}
+            onCopy={handleCopy}
+            copied={copied}
+          />
+        )
       )}
 
       {/* Code Snippet */}
