@@ -146,7 +146,7 @@ export default function ProjectPage() {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-xl font-semibold">{project?.name ?? 'Project'}</h1>
-            {role && apis.length > 0 && (
+            {role && (
               <ProjectActionBar
                 role={role}
                 onAddApi={() => router.push(`/projects/${projectId}/apis/new`)}

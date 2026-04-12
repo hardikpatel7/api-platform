@@ -77,15 +77,16 @@ describe('ProjectPage — empty state', () => {
     await waitFor(() => {
       expect(screen.getByText('No APIs yet')).toBeInTheDocument()
     })
-    expect(screen.getByRole('button', { name: /add api/i })).toBeInTheDocument()
+    // ProjectActionBar + EmptyState both render Add API buttons when apis.length === 0
+    expect(screen.getAllByRole('button', { name: /add api/i }).length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows empty state with Import buttons for editor', async () => {
     vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
     render(<ProjectPage />)
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /import openapi/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /import har/i })).toBeInTheDocument()
+      expect(screen.getAllByRole('button', { name: /import openapi/i }).length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByRole('button', { name: /import har/i }).length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -95,7 +96,8 @@ describe('ProjectPage — empty state', () => {
     await waitFor(() => {
       expect(screen.getByText('No APIs yet')).toBeInTheDocument()
     })
-    expect(screen.getByRole('button', { name: /suggest new api/i })).toBeInTheDocument()
+    // ProjectActionBar + EmptyState both render suggest buttons when apis.length === 0
+    expect(screen.getAllByRole('button', { name: /suggest new api/i }).length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows passive empty state for viewer', async () => {
