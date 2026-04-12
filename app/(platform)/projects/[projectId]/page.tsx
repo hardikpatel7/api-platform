@@ -15,6 +15,8 @@ import { ProjectActionBar } from '@/components/api/ProjectActionBar'
 import { useRole } from '@/hooks/useRole'
 import { bulkImportAction } from '@/app/actions/bulkImport'
 import type { ApiEntry, Project } from '@/types'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { canDo } from '@/lib/permissions'
 
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -144,7 +146,7 @@ export default function ProjectPage() {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-xl font-semibold">{project?.name ?? 'Project'}</h1>
-            {role && (
+            {role && apis.length > 0 && (
               <ProjectActionBar
                 role={role}
                 onAddApi={() => router.push(`/projects/${projectId}/apis/new`)}
@@ -160,13 +162,37 @@ export default function ProjectPage() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {isSearch
-                ? 'No APIs match your search.'
-                : apis.length === 0
-                  ? 'No APIs yet. Add one to get started.'
-                  : 'No APIs match the current filters.'}
-            </p>
+            isSearch ? (
+              <p className="text-sm text-muted-foreground">No APIs match your search.</p>
+            ) : apis.length === 0 ? (
+              role && canDo(role, 'direct_edit') ? (
+                <EmptyState
+                  icon="🔌"
+                  title="No APIs yet"
+                  description="Add your first API entry manually, or import from an OpenAPI spec or HAR file."
+                  actions={[
+                    { label: '+ Add API', variant: 'primary', onClick: () => router.push(`/projects/${projectId}/apis/new`) },
+                    { label: 'Import OpenAPI', variant: 'secondary', onClick: () => setShowOpenAPI(true) },
+                    { label: 'Import HAR', variant: 'secondary', onClick: () => setShowHAR(true) },
+                  ]}
+                />
+              ) : role === 'suggester' ? (
+                <EmptyState
+                  icon="🔌"
+                  title="No APIs yet"
+                  description="This project has no APIs. You can suggest a new one for editors to review."
+                  actions={[{ label: 'Suggest new API', variant: 'primary', onClick: () => router.push(`/projects/${projectId}/apis/new`) }]}
+                />
+              ) : (
+                <EmptyState
+                  icon="🔌"
+                  title="No APIs yet"
+                  description="This project has no APIs documented yet."
+                />
+              )
+            ) : (
+              <p className="text-sm text-muted-foreground">No APIs match the current filters.</p>
+            )
           ) : (
             <div className="space-y-6">
               {[...grouped.entries()].map(([groupName, entries]) => (
