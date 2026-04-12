@@ -121,26 +121,18 @@ This platform addresses all three at the intersection.
 
 ---
 
-## Current State
-
-Phases 1–4 are fully built and test-covered (311 automated tests). The platform is ready to connect to a Supabase backend and deploy to Vercel.
-
-| Phase | What was built |
-|---|---|
-| Phase 1 | Projects, API entries, full CRUD, sidebar with filters, all detail tabs |
-| Phase 2 | OpenAPI + HAR import, AI Generate, semantic search |
-| Phase 3 | Role-based access, suggestion workflow, diff view, approve/reject/withdraw, user management |
-| Phase 4 | History system, audit trail per API, action-level color coding |
-
-**Pending before first production deployment** (see `docs/setup.md` for full detail):
-- Three database migration files (`suggestions` and `history_events` tables, role-scoped RLS policies, Postgres audit trigger)
-- Two page routes to wire up (`/suggestions` panel, `/settings/users` management)
-
----
-
 ## Tech Stack
 
 Next.js 14 · TypeScript · Supabase (Postgres + Auth + Realtime) · Anthropic SDK (Claude) · Tailwind CSS · Zustand · Vitest
+
+---
+
+## Architecture Decisions
+
+See [`docs/architecture-decisions/`](docs/architecture-decisions/) for documented decisions on:
+- [Google OAuth options](docs/architecture-decisions/auth-google.md)
+- [Hosting options](docs/architecture-decisions/hosting-options.md)
+- [Vercel analysis](docs/architecture-decisions/vercel-analysis.md)
 
 ---
 
@@ -155,5 +147,5 @@ npm run dev
 ```
 
 ```bash
-npm run test:run   # 311 tests, no external dependencies required
+npm run test:run   # 390 tests, no external dependencies required
 ```
