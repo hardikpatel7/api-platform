@@ -39,10 +39,9 @@ interface ApiDetailTabsProps {
   historyEvents?: HistoryEntry[]
   role?: UserRole
   onEdit?: () => void
-  onGenerate?: () => void
 }
 
-export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit, onGenerate }: ApiDetailTabsProps) {
+export function ApiDetailTabs({ entry, historyEvents = [], role, onEdit }: ApiDetailTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [copied, setCopied] = useState(false)
 
