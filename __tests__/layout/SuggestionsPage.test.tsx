@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import SuggestionsPage from '@/app/(platform)/suggestions/page'
 
 const mockPush = vi.fn()
@@ -99,5 +99,30 @@ describe('SuggestionsPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /withdraw/i })).toBeInTheDocument()
     })
+  })
+
+  it('passes onBrowse to SuggestionPanel which navigates to / for suggester', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    mockPush.mockClear()
+
+    vi.mocked(mockFrom).mockImplementation((table: string) => {
+      if (table === 'suggestions') {
+        return {
+          select: () => ({
+            order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
+        }
+      }
+      return {}
+    })
+
+    render(<SuggestionsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('No pending suggestions')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /browse projects/i }))
+    expect(mockPush).toHaveBeenCalledWith('/')
   })
 })

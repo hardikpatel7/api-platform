@@ -50,6 +50,7 @@ export default function SuggestionsPage() {
           onApprove={(id) => approveSuggestionAction(id)}
           onReject={(id, note) => rejectSuggestionAction(id, note)}
           onWithdraw={(id) => withdrawSuggestionAction(id)}
+          onBrowse={() => router.push('/')}
         />
       </div>
     </main>
