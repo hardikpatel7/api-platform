@@ -1,0 +1,8 @@
+[    6624ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[    6818ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/favicon.ico:0
+[   10202ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[   10650ms] [LOG] [Fast Refresh] done in 448ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[   10665ms] [LOG] [Fast Refresh] done in 463ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[   49911ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://akhsmlriorhfzsgmpggu.supabase.co/auth/v1/token?grant_type=password:0
+[   57927ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://akhsmlriorhfzsgmpggu.supabase.co/auth/v1/token?grant_type=password:0
+[   66836ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://akhsmlriorhfzsgmpggu.supabase.co/auth/v1/token?grant_type=password:0

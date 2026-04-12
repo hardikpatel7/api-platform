@@ -3,45 +3,24 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import RegisterPage from '@/app/(auth)/register/page'
 
+const mockPush = vi.fn()
+
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: mockPush, replace: vi.fn() }),
   redirect: vi.fn(),
 }))
 
 const mockSignUp = vi.fn()
-const mockInsert = vi.fn()
-const mockSingle = vi.fn()
-const mockFrom = vi.fn()
 
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     auth: { signUp: mockSignUp },
-    from: mockFrom,
   }),
 }))
 
 beforeEach(() => {
   mockSignUp.mockReset()
-  mockInsert.mockReset()
-  mockSingle.mockReset()
-
-  // Default: no pre-registered slot found
-  mockSingle.mockResolvedValue({ data: null, error: { code: 'PGRST116' } })
-  mockInsert.mockResolvedValue({ error: null })
-
-  vi.mocked(mockFrom).mockImplementation(() => ({
-    select: () => ({
-      eq: () => ({
-        neq: () => ({ single: mockSingle }),
-      }),
-    }),
-    insert: mockInsert,
-    delete: () => ({
-      eq: () => ({
-        neq: vi.fn().mockResolvedValue({ error: null }),
-      }),
-    }),
-  }))
+  mockPush.mockReset()
 })
 
 describe('RegisterPage', () => {
@@ -58,7 +37,7 @@ describe('RegisterPage', () => {
     expect(screen.getByRole('link', { name: /sign in|log in/i })).toBeInTheDocument()
   })
 
-  it('calls signUp and inserts user row on submit', async () => {
+  it('calls signUp with email, password, and name metadata on submit', async () => {
     mockSignUp.mockResolvedValue({ data: { user: { id: 'new-user-id' } }, error: null })
     const user = userEvent.setup()
     render(<RegisterPage />)
@@ -72,12 +51,16 @@ describe('RegisterPage', () => {
       expect(mockSignUp).toHaveBeenCalledWith({
         email: 'alice@example.com',
         password: 'password123',
+        options: {
+          data: { name: 'Alice' },
+          emailRedirectTo: expect.stringContaining('/auth/callback'),
+        },
       })
     })
   })
 
-  it('inserts with viewer role when no pre-registered slot exists', async () => {
-    mockSignUp.mockResolvedValue({ data: { user: { id: 'new-uid' } }, error: null })
+  it('redirects to home on successful sign-up when session is returned', async () => {
+    mockSignUp.mockResolvedValue({ data: { user: { id: 'new-uid' }, session: { access_token: 'tok' } }, error: null })
     const user = userEvent.setup()
     render(<RegisterPage />)
 
@@ -87,17 +70,29 @@ describe('RegisterPage', () => {
     await user.click(screen.getByRole('button', { name: /sign up|create account/i }))
 
     await waitFor(() => {
-      expect(mockInsert).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'new-uid', email: 'bob@example.com', role: 'viewer' })
-      )
+      expect(mockPush).toHaveBeenCalledWith('/')
     })
   })
 
-  it('adopts pre-registered role when email matches an existing slot', async () => {
-    mockSignUp.mockResolvedValue({ data: { user: { id: 'new-uid' } }, error: null })
-    // Pre-registered slot found with editor role
-    mockSingle.mockResolvedValue({ data: { role: 'editor' }, error: null })
+  it('shows confirmation message when email confirmation is required (session is null)', async () => {
+    mockSignUp.mockResolvedValue({ data: { user: { id: 'new-uid' }, session: null }, error: null })
+    const user = userEvent.setup()
+    render(<RegisterPage />)
 
+    await user.type(screen.getByLabelText(/name/i), 'Carol')
+    await user.type(screen.getByLabelText(/email/i), 'carol@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'password123')
+    await user.click(screen.getByRole('button', { name: /sign up|create account/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/check your email/i)).toBeInTheDocument()
+      expect(screen.getByText(/carol@example\.com/)).toBeInTheDocument()
+    })
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('does not redirect when sign-up fails', async () => {
+    mockSignUp.mockResolvedValue({ data: null, error: { message: 'User already registered' } })
     const user = userEvent.setup()
     render(<RegisterPage />)
 
@@ -107,14 +102,13 @@ describe('RegisterPage', () => {
     await user.click(screen.getByRole('button', { name: /sign up|create account/i }))
 
     await waitFor(() => {
-      expect(mockInsert).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'new-uid', email: 'alice@example.com', role: 'editor' })
-      )
+      expect(screen.getByText(/an account with this email already exists/i)).toBeInTheDocument()
     })
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   it('displays an error message on failed sign-up', async () => {
-    mockSignUp.mockResolvedValue({ data: null, error: { message: 'Email already in use' } })
+    mockSignUp.mockResolvedValue({ data: null, error: { message: 'Email rate limit exceeded' } })
     const user = userEvent.setup()
     render(<RegisterPage />)
 
@@ -124,7 +118,7 @@ describe('RegisterPage', () => {
     await user.click(screen.getByRole('button', { name: /sign up|create account/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/email already in use/i)).toBeInTheDocument()
+      expect(screen.getByText(/too many attempts/i)).toBeInTheDocument()
     })
   })
 })

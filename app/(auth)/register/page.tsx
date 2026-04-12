@@ -5,6 +5,19 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
+function mapAuthError(message: string): string {
+  const m = message.toLowerCase()
+  if (m.includes('user already registered'))
+    return 'An account with this email already exists. Try signing in instead.'
+  if (m.includes('email rate limit exceeded') || m.includes('rate limit'))
+    return 'Too many attempts. Please wait a moment and try again.'
+  if (m.includes('password should be at least 6 characters'))
+    return 'Password must be at least 6 characters.'
+  if (m.includes('database error'))
+    return `Sign-up failed due to a database error: ${message}`
+  return `Something went wrong: ${message}`
+}
+
 export default function RegisterPage() {
   const router = useRouter()
   const [name, setName] = useState('')
@@ -12,6 +25,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -22,19 +36,47 @@ export default function RegisterPage() {
     // The public.users row is created automatically by the on_auth_user_created
     // database trigger (migration 008). Name is passed via user metadata so the
     // trigger can store it. Pre-registration role resolution also happens in the trigger.
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: { name },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
 
     if (signUpError) {
-      setError(signUpError.message)
+      setError(mapAuthError(signUpError.message))
+      setLoading(false)
+      return
+    }
+
+    // session is null when Supabase email confirmation is enabled.
+    // The user must click the confirmation link before they can sign in.
+    if (!data.session) {
+      setConfirmationSent(true)
       setLoading(false)
       return
     }
 
     router.push('/')
+  }
+
+  if (confirmationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-full max-w-sm space-y-4 p-8 border rounded-lg shadow-sm text-center">
+          <h1 className="text-2xl font-semibold">Check your email</h1>
+          <p className="text-sm text-muted-foreground">
+            We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.
+            Click it to activate your account, then sign in.
+          </p>
+          <Link href="/login" className="text-sm font-medium underline underline-offset-4">
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
