@@ -72,6 +72,6 @@ describe('HistoryFeed — events', () => {
 describe('HistoryFeed — empty state', () => {
   it('shows empty message when no events', () => {
     render(<HistoryFeed events={[]} />)
-    expect(screen.getByText(/no history recorded yet/i)).toBeInTheDocument()
+    expect(screen.getByText('No history yet')).toBeInTheDocument()
   })
 })

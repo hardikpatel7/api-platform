@@ -53,9 +53,40 @@ describe('SuggestionPanel — tabs', () => {
 })
 
 describe('SuggestionPanel — empty state', () => {
-  it('shows empty message when no pending suggestions', () => {
+  it('shows "All caught up" for editor on empty pending tab', () => {
     render(<SuggestionPanel suggestions={[approved, rejected]} role="editor" />)
-    expect(screen.getByText(/no pending suggestions/i)).toBeInTheDocument()
+    expect(screen.getByText('All caught up')).toBeInTheDocument()
+  })
+
+  it('shows "No pending suggestions" for suggester on empty pending tab', () => {
+    render(<SuggestionPanel suggestions={[approved, rejected]} role="suggester" />)
+    expect(screen.getByText('No pending suggestions')).toBeInTheDocument()
+  })
+
+  it('shows Browse projects button for suggester on empty pending tab', () => {
+    const onBrowse = vi.fn()
+    render(
+      <SuggestionPanel
+        suggestions={[approved, rejected]}
+        role="suggester"
+        onBrowse={onBrowse}
+      />
+    )
+    const btn = screen.getByRole('button', { name: /browse projects/i })
+    fireEvent.click(btn)
+    expect(onBrowse).toHaveBeenCalledOnce()
+  })
+
+  it('shows "No approved suggestions" on empty approved tab', () => {
+    render(<SuggestionPanel suggestions={[pending, rejected]} role="editor" />)
+    fireEvent.click(screen.getByRole('tab', { name: /approved/i }))
+    expect(screen.getByText('No approved suggestions')).toBeInTheDocument()
+  })
+
+  it('shows "No rejected suggestions" on empty rejected tab', () => {
+    render(<SuggestionPanel suggestions={[pending, approved]} role="editor" />)
+    fireEvent.click(screen.getByRole('tab', { name: /rejected/i }))
+    expect(screen.getByText('No rejected suggestions')).toBeInTheDocument()
   })
 })
 

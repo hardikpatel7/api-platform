@@ -15,12 +15,15 @@ import { ProjectActionBar } from '@/components/api/ProjectActionBar'
 import { useRole } from '@/hooks/useRole'
 import { bulkImportAction } from '@/app/actions/bulkImport'
 import type { ApiEntry, Project } from '@/types'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Plug } from 'lucide-react'
+import { canDo } from '@/lib/permissions'
 
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const router = useRouter()
   const { apis, setApis, loading, setLoading } = useApiStore()
-  const { projects, setProjects } = useProjectStore()
+  const { projects, setProjects, apiCounts, mergeApiCount } = useProjectStore()
   const { role } = useRole()
   const [project, setProject] = useState<Project | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
@@ -50,7 +53,10 @@ export default function ProjectPage() {
         .select('*')
         .eq('project_id', projectId)
         .order('created_at', { ascending: false })
-      if (data) setApis(data as ApiEntry[])
+      if (data) {
+        setApis(data as ApiEntry[])
+        mergeApiCount(projectId, data.length)
+      }
 
       const { data: projs } = await supabase
         .from('projects')
@@ -118,8 +124,6 @@ export default function ProjectPage() {
   const showGroupHeaders = !isSearch && apis.some((a) => a.group)
   const allTags = [...new Set(apis.flatMap((a) => a.tags ?? []))]
   const subtitle = buildSubtitle(filtered.length, statusFilter, tagFilter, isSearch)
-  const apiCounts: Record<string, number> = { [projectId]: apis.length }
-
   return (
     <div className="flex flex-1 overflow-hidden">
       <Sidebar
@@ -160,13 +164,37 @@ export default function ProjectPage() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {isSearch
-                ? 'No APIs match your search.'
-                : apis.length === 0
-                  ? 'No APIs yet. Add one to get started.'
-                  : 'No APIs match the current filters.'}
-            </p>
+            isSearch ? (
+              <p className="text-sm text-muted-foreground">No APIs match your search.</p>
+            ) : apis.length === 0 ? (
+              role && canDo(role, 'direct_edit') ? (
+                <EmptyState
+                  icon={<Plug className="w-5 h-5" />}
+                  title="No APIs yet"
+                  description="Add your first API entry manually, or import from an OpenAPI spec or HAR file."
+                  actions={[
+                    { label: '+ Add API', variant: 'primary', onClick: () => router.push(`/projects/${projectId}/apis/new`) },
+                    { label: 'Import OpenAPI', variant: 'secondary', onClick: () => setShowOpenAPI(true) },
+                    { label: 'Import HAR', variant: 'secondary', onClick: () => setShowHAR(true) },
+                  ]}
+                />
+              ) : role === 'suggester' ? (
+                <EmptyState
+                  icon={<Plug className="w-5 h-5" />}
+                  title="No APIs yet"
+                  description="This project has no APIs. You can suggest a new one for editors to review."
+                  actions={[{ label: 'Suggest new API', variant: 'primary', onClick: () => router.push(`/projects/${projectId}/apis/new`) }]}
+                />
+              ) : (
+                <EmptyState
+                  icon={<Plug className="w-5 h-5" />}
+                  title="No APIs yet"
+                  description="This project has no APIs documented yet."
+                />
+              )
+            ) : (
+              <p className="text-sm text-muted-foreground">No APIs match the current filters.</p>
+            )
           ) : (
             <div className="space-y-6">
               {[...grouped.entries()].map(([groupName, entries]) => (

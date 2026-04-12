@@ -24,6 +24,7 @@ export default function ApiDetailPage() {
   const [entry, setEntry] = useState<ApiEntry | null>(null)
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
   const [historyEvents, setHistoryEvents] = useState<HistoryEntry[]>([])
 
   useEffect(() => {
@@ -110,6 +111,28 @@ export default function ApiDetailPage() {
     setEditing(false)
   }
 
+  async function handleGenerateFromDetail() {
+    if (!entry) return
+    setGenerating(true)
+    try {
+      const result = await generateApiDocsAction({
+        name: entry.name,
+        method: entry.method,
+        endpoint: entry.endpoint,
+        requestSchema: entry.request_schema ?? undefined,
+        responseSchema: entry.response_schema ?? undefined,
+      })
+      await handleSave({
+        tool_description: result.tool_description,
+        mcp_config: result.mcp_config,
+      })
+    } catch (err) {
+      console.error('AI generation failed', err)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   if (loading) {
     return <main className="flex-1 p-6"><p className="text-sm text-muted-foreground">Loading…</p></main>
   }
@@ -168,7 +191,14 @@ export default function ApiDetailPage() {
             onGenerate={role && canDo(role, 'use_ai') ? generateApiDocsAction : undefined}
           />
         ) : (
-          <ApiDetailTabs entry={entry} historyEvents={historyEvents} />
+          <ApiDetailTabs
+            entry={entry}
+            historyEvents={historyEvents}
+            role={role ?? undefined}
+            onEdit={() => setEditing(true)}
+            onGenerate={role && canDo(role, 'use_ai') ? handleGenerateFromDetail : undefined}
+            generating={generating}
+          />
         )}
       </div>
     </main>

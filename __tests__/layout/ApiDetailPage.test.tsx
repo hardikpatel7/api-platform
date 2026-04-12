@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import ApiDetailPage from '@/app/(platform)/projects/[projectId]/apis/[apiId]/page'
+import { generateApiDocsAction } from '@/app/actions/generate'
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -162,7 +163,7 @@ describe('ApiDetailPage — history events', () => {
     fireEvent.click(screen.getByRole('tab', { name: /history/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('No history recorded yet.')).toBeInTheDocument()
+      expect(screen.getByText('No history yet')).toBeInTheDocument()
     })
   })
 })
@@ -236,6 +237,75 @@ describe('ApiDetailPage — suggester routing', () => {
     await waitFor(() => {
       expect(mockSubmitSuggestion).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'edit', apiId: 'api-1' })
+      )
+    })
+  })
+})
+
+describe('ApiDetailPage — MCP Generate from empty state', () => {
+  it('calls generateApiDocsAction and saves result when Generate button is clicked', async () => {
+    vi.mocked(generateApiDocsAction).mockResolvedValue({
+      tool_description: 'Generated desc',
+      mcp_config: JSON.stringify({ name: 'get_items' }),
+    })
+
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: () => ({
+        select: () => ({
+          single: vi.fn().mockResolvedValue({
+            data: { ...testEntry, mcp_config: { name: 'get_items' } },
+            error: null,
+          }),
+        }),
+      }),
+    })
+
+    vi.mocked(mockFrom).mockImplementation((table: string) => {
+      if (table === 'api_entries') {
+        return {
+          select: () => ({
+            eq: () => ({
+              single: vi.fn().mockResolvedValue({ data: { ...testEntry, mcp_config: null }, error: null }),
+            }),
+          }),
+          update: mockUpdate,
+          delete: () => ({ eq: vi.fn() }),
+        }
+      }
+      if (table === 'history_events') {
+        return {
+          select: () => ({
+            eq: () => ({
+              order: () => ({
+                limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+          }),
+        }
+      }
+      return {}
+    })
+
+    render(<ApiDetailPage />)
+    await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('tab', { name: /mcp config/i }))
+    await waitFor(() => expect(screen.getByText('No MCP config yet')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: '✨ Generate' }))
+
+    await waitFor(() => {
+      expect(generateApiDocsAction).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Get Items', method: 'GET', endpoint: '/api/v1/items' })
+      )
+    })
+
+    await waitFor(() => {
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tool_description: 'Generated desc',
+          mcp_config: JSON.stringify({ name: 'get_items' }),
+        })
       )
     })
   })

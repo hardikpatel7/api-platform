@@ -15,7 +15,36 @@ vi.mock('@/hooks/useRole', () => ({
 }))
 
 vi.mock('@/store/projectStore', () => ({
-  useProjectStore: vi.fn(() => ({
+  useProjectStore: vi.fn(),
+}))
+
+const mockFrom = vi.fn()
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
+    from: mockFrom,
+  }),
+}))
+
+import { useRole } from '@/hooks/useRole'
+import { useProjectStore } from '@/store/projectStore'
+
+// A chainable/awaitable eq result
+const makeEqChain = (): {
+  data: null
+  error: null
+  eq: () => Promise<{ data: null; error: null }>
+  then: (resolve: (v: { data: null; error: null }) => unknown) => Promise<unknown>
+} => ({
+  data: null,
+  error: null,
+  eq: () => Promise.resolve({ data: null, error: null }),
+  then: (resolve) => Promise.resolve({ data: null, error: null }).then(resolve),
+})
+
+// Default: one project in the list
+beforeEach(() => {
+  vi.mocked(useProjectStore).mockReturnValue({
     projects: [
       {
         id: 'p1',
@@ -30,33 +59,11 @@ vi.mock('@/store/projectStore', () => ({
     removeProject: vi.fn(),
     loading: false,
     setLoading: vi.fn(),
-  })),
-}))
+    apiCounts: {},
+    setApiCounts: vi.fn(),
+    mergeApiCount: vi.fn(),
+  })
 
-const mockFrom = vi.fn()
-vi.mock('@/lib/supabase/client', () => ({
-  createClient: () => ({
-    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'u1' } } }) },
-    from: mockFrom,
-  }),
-}))
-
-import { useRole } from '@/hooks/useRole'
-
-// A chainable/awaitable eq result — supports .eq(...).eq(...) and await .eq(...)
-const makeEqChain = (): {
-  data: null
-  error: null
-  eq: () => Promise<{ data: null; error: null }>
-  then: (resolve: (v: { data: null; error: null }) => unknown) => Promise<unknown>
-} => ({
-  data: null,
-  error: null,
-  eq: () => Promise.resolve({ data: null, error: null }),
-  then: (resolve) => Promise.resolve({ data: null, error: null }).then(resolve),
-})
-
-beforeEach(() => {
   vi.mocked(mockFrom).mockReturnValue({
     select: () => ({
       order: () => ({ data: [], error: null }),
@@ -130,5 +137,50 @@ describe('HomePage — sidebar navigation', () => {
     await waitFor(() => {
       expect(screen.getByText(/users/i)).toBeInTheDocument()
     })
+  })
+})
+
+describe('HomePage — empty state', () => {
+  beforeEach(() => {
+    vi.mocked(useProjectStore).mockReturnValue({
+      projects: [],
+      setProjects: vi.fn(),
+      addProject: vi.fn(),
+      removeProject: vi.fn(),
+      loading: false,
+      setLoading: vi.fn(),
+      apiCounts: {},
+      setApiCounts: vi.fn(),
+      mergeApiCount: vi.fn(),
+    })
+  })
+
+  it('shows empty state hero for editor with New project CTA in content area', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    render(<HomePage />)
+    await waitFor(() => {
+      expect(screen.getByText('No projects yet')).toBeInTheDocument()
+    })
+    const buttons = screen.getAllByRole('button', { name: /new project/i })
+    expect(buttons.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows passive empty state for viewer with no create CTA', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false })
+    render(<HomePage />)
+    await waitFor(() => {
+      expect(screen.getByText('No projects yet')).toBeInTheDocument()
+      expect(screen.getByText(/ask your admin/i)).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: /new project/i })).not.toBeInTheDocument()
+  })
+
+  it('shows passive empty state for suggester with no create CTA', async () => {
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    render(<HomePage />)
+    await waitFor(() => {
+      expect(screen.getByText('No projects yet')).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: /new project/i })).not.toBeInTheDocument()
   })
 })

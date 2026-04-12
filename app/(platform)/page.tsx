@@ -7,17 +7,18 @@ import { useProjectStore } from '@/store/projectStore'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { useRole } from '@/hooks/useRole'
 import { canDo } from '@/lib/permissions'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { FolderOpen } from 'lucide-react'
 import type { Project } from '@/types'
 
 export default function HomePage() {
   const router = useRouter()
-  const { projects, setProjects, addProject, removeProject, loading, setLoading } = useProjectStore()
+  const { projects, setProjects, addProject, removeProject, loading, setLoading, apiCounts, setApiCounts } = useProjectStore()
   const { role } = useRole()
   const [showCreate, setShowCreate] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
-  const [apiCounts, setApiCounts] = useState<Record<string, number>>({})
   const [pendingSuggestionCount, setPendingSuggestionCount] = useState(0)
 
   useEffect(() => {
@@ -163,13 +164,26 @@ export default function HomePage() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : projects.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No projects yet. Create one to get started.</p>
+            role && canDo(role, 'direct_edit') ? (
+              <EmptyState
+                icon={<FolderOpen className="w-5 h-5" />}
+                title="No projects yet"
+                description="Create your first project to start documenting APIs and sharing them with your team."
+                actions={[{ label: '+ New project', variant: 'primary', onClick: () => setShowCreate(true) }]}
+              />
+            ) : (
+              <EmptyState
+                icon={<FolderOpen className="w-5 h-5" />}
+                title="No projects yet"
+                description="Ask your admin to create a project and you'll see it here."
+              />
+            )
           ) : (
             <div className="space-y-2">
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 cursor-pointer"
+                  className="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md hover:shadow-black/30"
                   onClick={() => router.push(`/projects/${project.id}`)}
                 >
                   <div>

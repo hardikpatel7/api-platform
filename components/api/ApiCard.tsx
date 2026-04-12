@@ -29,7 +29,7 @@ export function ApiCard({ entry, projectId, projectName, hasPendingSuggestion }:
   return (
     <Link
       href={`/projects/${projectId}/apis/${entry.id}`}
-      className="block border rounded-lg p-4 hover:border-primary/50 hover:shadow-sm transition-all bg-card"
+      className="block border rounded-lg p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md hover:shadow-black/30 bg-card"
     >
       <div className="flex items-start gap-3">
         {/* Method badge */}

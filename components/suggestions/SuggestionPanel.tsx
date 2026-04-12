@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { SuggestionCard } from './SuggestionCard'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { CheckCircle2, Lightbulb, ClipboardList } from 'lucide-react'
 import type { Suggestion, UserRole } from '@/types'
 
 type Tab = 'pending' | 'approved' | 'rejected'
@@ -14,6 +16,49 @@ interface SuggestionPanelProps {
   onApprove?: (id: string) => void
   onReject?: (id: string, note: string) => void
   onWithdraw?: (id: string) => void
+  onBrowse?: () => void
+}
+
+const EMPTY_STATES: Record<Tab, {
+  editor: { icon: React.ReactNode; title: string; description: string }
+  default: { icon: React.ReactNode; title: string; description: string }
+}> = {
+  pending: {
+    editor: {
+      icon: <CheckCircle2 className="w-5 h-5" />,
+      title: 'All caught up',
+      description: 'No pending suggestions right now. Team suggestions will appear here for your review.',
+    },
+    default: {
+      icon: <Lightbulb className="w-5 h-5" />,
+      title: 'No pending suggestions',
+      description: 'Browse API entries and suggest edits or additions for editors to review.',
+    },
+  },
+  approved: {
+    editor: {
+      icon: <ClipboardList className="w-5 h-5" />,
+      title: 'No approved suggestions',
+      description: 'Approved suggestions will be archived here after editors accept them.',
+    },
+    default: {
+      icon: <ClipboardList className="w-5 h-5" />,
+      title: 'No approved suggestions',
+      description: 'Approved suggestions will be archived here after editors accept them.',
+    },
+  },
+  rejected: {
+    editor: {
+      icon: <ClipboardList className="w-5 h-5" />,
+      title: 'No rejected suggestions',
+      description: 'Suggestions that were declined will be archived here.',
+    },
+    default: {
+      icon: <ClipboardList className="w-5 h-5" />,
+      title: 'No rejected suggestions',
+      description: 'Suggestions that were declined will be archived here.',
+    },
+  },
 }
 
 export function SuggestionPanel({
@@ -23,6 +68,7 @@ export function SuggestionPanel({
   onApprove,
   onReject,
   onWithdraw,
+  onBrowse,
 }: SuggestionPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>('pending')
 
@@ -33,8 +79,24 @@ export function SuggestionPanel({
   }
 
   const visible = suggestions.filter((s) => s.status === activeTab)
-
   const tabs: Tab[] = ['pending', 'approved', 'rejected']
+
+  function renderEmpty(tab: Tab) {
+    const isEditor = role === 'editor' || role === 'admin'
+    const state = isEditor ? EMPTY_STATES[tab].editor : EMPTY_STATES[tab].default
+    const actions =
+      tab === 'pending' && !isEditor && onBrowse
+        ? [{ label: 'Browse projects', variant: 'primary' as const, onClick: onBrowse }]
+        : undefined
+    return (
+      <EmptyState
+        icon={state.icon}
+        title={state.title}
+        description={state.description}
+        actions={actions}
+      />
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -64,9 +126,7 @@ export function SuggestionPanel({
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {visible.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No {activeTab} suggestions
-          </p>
+          renderEmpty(activeTab)
         ) : (
           visible.map((suggestion) => (
             <SuggestionCard
