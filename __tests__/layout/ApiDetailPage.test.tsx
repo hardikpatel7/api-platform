@@ -162,7 +162,7 @@ describe('ApiDetailPage — history events', () => {
     fireEvent.click(screen.getByRole('tab', { name: /history/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('No history recorded yet.')).toBeInTheDocument()
+      expect(screen.getByText('No history yet')).toBeInTheDocument()
     })
   })
 })

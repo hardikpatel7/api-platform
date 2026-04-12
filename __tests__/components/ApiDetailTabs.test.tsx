@@ -40,7 +40,7 @@ describe('ApiDetailTabs', () => {
     const user = userEvent.setup()
     render(<ApiDetailTabs entry={entry} />)
     await user.click(screen.getByRole('tab', { name: /history/i }))
-    expect(screen.getByText(/no history recorded yet/i)).toBeInTheDocument()
+    expect(screen.getByText('No history yet')).toBeInTheDocument()
   })
 
   it('shows history events when historyEvents prop is provided', async () => {
