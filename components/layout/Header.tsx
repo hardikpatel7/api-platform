@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Terminal, LogOut } from 'lucide-react'
+import { Terminal, LogOut, User } from 'lucide-react'
 
 interface HeaderProps {
   userName: string
@@ -24,6 +24,9 @@ export function Header({ userName }: HeaderProps) {
         <span className="font-semibold text-sm">API Platform</span>
       </div>
       <div className="flex items-center gap-4">
+        <div className="w-6 h-6 rounded-full bg-white/[0.08] flex items-center justify-center shrink-0">
+          <User className="w-3.5 h-3.5 text-white/60" />
+        </div>
         <span className="text-sm text-muted-foreground">{userName}</span>
         <button
           onClick={handleSignOut}

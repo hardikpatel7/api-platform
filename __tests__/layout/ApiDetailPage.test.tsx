@@ -13,7 +13,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/hooks/useRole', () => ({
-  useRole: vi.fn(() => ({ role: 'editor', loading: false })),
+  useRole: vi.fn(() => ({ role: 'editor', loading: false, noAdminExists: false })),
 }))
 
 import { useRole } from '@/hooks/useRole'
@@ -79,7 +79,7 @@ const testHistoryEvent = {
 }
 
 beforeEach(() => {
-  vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+  vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
   mockSubmitSuggestion.mockReset()
   mockSubmitSuggestion.mockResolvedValue(undefined)
 
@@ -170,7 +170,7 @@ describe('ApiDetailPage — history events', () => {
 
 describe('ApiDetailPage — suggestion badge', () => {
   it('shows Suggestion badge when suggester opens the edit form', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
 
     render(<ApiDetailPage />)
     await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
@@ -195,7 +195,7 @@ describe('ApiDetailPage — suggestion badge', () => {
 
 describe('ApiDetailPage — suggester routing', () => {
   it('calls submitSuggestionAction with type delete when suggester clicks Suggest Delete', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     render(<ApiDetailPage />)
@@ -211,7 +211,7 @@ describe('ApiDetailPage — suggester routing', () => {
   })
 
   it('shows Submit Suggestion label on the edit form when role is suggester', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
 
     render(<ApiDetailPage />)
     await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())
@@ -224,7 +224,7 @@ describe('ApiDetailPage — suggester routing', () => {
   })
 
   it('calls submitSuggestionAction with type edit when suggester submits the edit form', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
 
     render(<ApiDetailPage />)
     await waitFor(() => expect(screen.getByText('Get Items')).toBeInTheDocument())

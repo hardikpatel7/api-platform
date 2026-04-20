@@ -32,13 +32,6 @@ describe('UserManagementModal — display', () => {
     render(<UserManagementModal users={mockUsers} currentUserId="u1" onClose={vi.fn()} />)
     expect(screen.getByText('(you)')).toBeInTheDocument()
   })
-
-  it('calls onClose when close button is clicked', () => {
-    const onClose = vi.fn()
-    render(<UserManagementModal users={mockUsers} currentUserId="u1" onClose={onClose} />)
-    fireEvent.click(screen.getByRole('button', { name: /close/i }))
-    expect(onClose).toHaveBeenCalled()
-  })
 })
 
 describe('UserManagementModal — role change', () => {

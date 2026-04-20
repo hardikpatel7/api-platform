@@ -75,7 +75,7 @@ beforeEach(() => {
 
 describe('ProjectPage — empty state', () => {
   it('shows empty state with Add API CTA for editor', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<ProjectPage />)
     await waitFor(() => {
       expect(screen.getByText('No APIs yet')).toBeInTheDocument()
@@ -85,7 +85,7 @@ describe('ProjectPage — empty state', () => {
   })
 
   it('shows empty state with Import buttons for editor', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<ProjectPage />)
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: /import openapi/i }).length).toBeGreaterThanOrEqual(1)
@@ -94,7 +94,7 @@ describe('ProjectPage — empty state', () => {
   })
 
   it('shows Suggest new API CTA for suggester', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     render(<ProjectPage />)
     await waitFor(() => {
       expect(screen.getByText('No APIs yet')).toBeInTheDocument()
@@ -104,7 +104,7 @@ describe('ProjectPage — empty state', () => {
   })
 
   it('shows passive empty state for viewer', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'viewer', loading: false, noAdminExists: false })
     render(<ProjectPage />)
     await waitFor(() => {
       expect(screen.getByText('No APIs yet')).toBeInTheDocument()

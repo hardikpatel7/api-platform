@@ -73,7 +73,7 @@ beforeEach(() => {
 
 describe('HomePage — pending count scoping', () => {
   it('shows all pending suggestions count for editor role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
 
     render(<HomePage />)
 
@@ -85,7 +85,7 @@ describe('HomePage — pending count scoping', () => {
   })
 
   it('shows only own pending suggestions count for suggester role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
 
     render(<HomePage />)
 

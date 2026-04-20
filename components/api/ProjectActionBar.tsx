@@ -1,6 +1,7 @@
 'use client'
 
 import { canDo } from '@/lib/permissions'
+import { Plus, FileCode, FileJson, MessageSquarePlus } from 'lucide-react'
 import type { UserRole } from '@/types'
 
 interface ProjectActionBarProps {
@@ -17,20 +18,23 @@ export function ProjectActionBar({ role, onAddApi, onImportHAR, onImportOpenAPI,
       <div className="flex gap-2">
         <button
           onClick={onImportHAR}
-          className="px-3 py-1.5 border rounded-md text-sm hover:bg-accent"
+          className="px-3 py-1.5 border rounded-md text-sm hover:bg-accent flex items-center gap-1.5"
         >
+          <FileJson className="w-3.5 h-3.5" />
           Import HAR
         </button>
         <button
           onClick={onImportOpenAPI}
-          className="px-3 py-1.5 border rounded-md text-sm hover:bg-accent"
+          className="px-3 py-1.5 border rounded-md text-sm hover:bg-accent flex items-center gap-1.5"
         >
+          <FileCode className="w-3.5 h-3.5" />
           Import OpenAPI
         </button>
         <button
           onClick={onAddApi}
-          className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90"
+          className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90 flex items-center gap-1.5"
         >
+          <Plus className="w-3.5 h-3.5" />
           Add API
         </button>
       </div>
@@ -41,9 +45,10 @@ export function ProjectActionBar({ role, onAddApi, onImportHAR, onImportOpenAPI,
     return (
       <button
         onClick={onSuggestNewApi}
-        className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90"
+        className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90 flex items-center gap-1.5"
       >
-        + Suggest New API
+        <MessageSquarePlus className="w-3.5 h-3.5" />
+        Suggest New API
       </button>
     )
   }

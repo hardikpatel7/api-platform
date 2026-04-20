@@ -14,7 +14,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/hooks/useRole', () => ({
-  useRole: vi.fn(() => ({ role: 'editor', loading: false })),
+  useRole: vi.fn(() => ({ role: 'editor', loading: false, noAdminExists: false })),
 }))
 
 import { useRole } from '@/hooks/useRole'
@@ -54,12 +54,12 @@ beforeEach(() => {
   mockSubmitSuggestion.mockReset()
   mockSubmitSuggestion.mockResolvedValue(undefined)
   mockPush.mockClear()
-  vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+  vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
 })
 
 describe('NewApiPage — suggestion badge', () => {
   it('shows Suggestion badge in the header when role is suggester', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     render(<NewApiPage />)
     await waitFor(() => {
       expect(screen.getByTestId('suggestion-badge')).toBeInTheDocument()
@@ -67,7 +67,7 @@ describe('NewApiPage — suggestion badge', () => {
   })
 
   it('does not show Suggestion badge for editor role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<NewApiPage />)
     await waitFor(() => expect(screen.getByRole('button', { name: /create api/i })).toBeInTheDocument())
     expect(screen.queryByTestId('suggestion-badge')).not.toBeInTheDocument()
@@ -76,7 +76,7 @@ describe('NewApiPage — suggestion badge', () => {
 
 describe('NewApiPage — suggester path', () => {
   it('shows Create API label for editor role', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'editor', loading: false, noAdminExists: false })
     render(<NewApiPage />)
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /create api/i })).toBeInTheDocument()
@@ -84,7 +84,7 @@ describe('NewApiPage — suggester path', () => {
   })
 
   it('shows Submit Suggestion label when role is suggester', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
     render(<NewApiPage />)
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /submit suggestion/i })).toBeInTheDocument()
@@ -92,7 +92,7 @@ describe('NewApiPage — suggester path', () => {
   })
 
   it('calls submitSuggestionAction with type create when suggester submits the form', async () => {
-    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false })
+    vi.mocked(useRole).mockReturnValue({ role: 'suggester', loading: false, noAdminExists: false })
 
     render(<NewApiPage />)
     await waitFor(() => expect(screen.getByRole('button', { name: /submit suggestion/i })).toBeInTheDocument())
